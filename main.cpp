@@ -39,13 +39,15 @@ time_t now(){
     return std::chrono::system_clock::to_time_t(now);
 }
 
-void send_sigterm(int pid){
+void send_sigterm(P_ID pid){
+    std::cerr << "kill -15 " << pid << "\n";
     std::stringstream cmd;
     cmd << "kill -15 " << pid;
     std::system(cmd.str().c_str());
 }
 
 bool is_running(P_ID pid){
+    std::cerr << "is_running: " << pid << "\n";
     std::stringstream cmd;
     cmd << "ps -p " << pid << " &> " << OUTPUT_BUFFER << "\n";
     std::cerr << "cmd: " << cmd.str() << "\n";
@@ -68,6 +70,7 @@ unsigned int n_free_cores(){
 }
 
 void free_cores(Job const& j){
+    std::cerr << "free cores\n";
     for( auto const& i : j.processor_ids ){
         cores_in_use[i] = false;
     }
@@ -86,11 +89,13 @@ std::vector<unsigned int> allocate_cores(unsigned int n){
             break;
         }
     }
+    std::cout << "allocate cores: " << cores.size() << "\n";
     return cores;
 }
 
 
 void start(Job& job){
+    std::cerr << "Start job\n";
     job.start_time = now();
 
     auto core_ids = allocate_cores(job.n_cores);
@@ -126,18 +131,19 @@ void start(Job& job){
 
 
 void clear_processes(){
+    std::cerr << "clear processes: " << running_jobs.size() << "\n";
     for( auto& [pid, job] : running_jobs ){
         std::cerr << "pid: " << pid << "\n";
         std::cerr << "job: " << job.command << "\n" << std::flush;
-        if( pid == 0 ){
-            running_jobs.erase(0);
-            continue;
-        }
         if( is_running(pid) && (now() - job.start_time > job.max_time) ){
+            std::cerr << "send sigterm " << pid << "\n";
             send_sigterm(pid);
             log_file << str_time() << ": Job " << pid << " terminated.\n" << std::flush;
         }
+        std::this_thread::sleep_for(50ms);
         if( !is_running(pid) ){
+            std::cerr << "erasing pid " << pid << "\n";
+            free_cores(job);
             running_jobs.erase(pid);
             log_file << str_time() << ": Job " << pid << " ended.\n"  << std::flush;
         }

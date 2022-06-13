@@ -67,6 +67,7 @@ std::vector<unsigned int> allocate_cores(unsigned int n){
     int i = 0;
     for( auto& [cid, in_use] : cores_in_use ){
         if( !in_use ){
+            cores.push_back(cid);
             ++i;
             in_use = true;
         }
@@ -89,6 +90,7 @@ void start(Job& job){
         cmd << id << " ";
     }
     cmd << job.command << "' > " << OUTPUT_BUFFER;
+    std::cerr << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
 
     std::ifstream pid_in(OUTPUT_BUFFER);

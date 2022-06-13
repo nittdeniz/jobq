@@ -13,7 +13,7 @@
 #include <vector>
 
 
-using P_ID = unsigned short;
+using P_ID = unsigned int;
 using namespace std::chrono_literals;
 
 std::vector<Job> job_queue;

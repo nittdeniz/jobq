@@ -130,6 +130,7 @@ void clear_processes(){
         std::cout << "pid: " << pid << "\n";
         std::cout << "job: " << job.command << "\n" << std::flush;
         if( pid == 0 ){
+            running_jobs.erase(0);
             continue;
         }
         if( is_running(pid) && (now() - job.start_time > job.max_time) ){

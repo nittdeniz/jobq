@@ -40,7 +40,7 @@ time_t now(){
 
 void send_sigterm(int pid){
     std::stringstream cmd;
-    cmd << "kill -SIGTERM " << pid;
+    cmd << "killall " << pid;
     std::system(cmd.str().c_str());
 }
 
@@ -116,11 +116,11 @@ void clear_processes(){
     for( auto& [pid, job] : running_jobs ){
         if( now() - job.start_time > job.max_time ){
             send_sigterm(pid);
-            log_file << str_time() << ": Job " << pid << " terminated." << std::flush;
+            log_file << str_time() << ": Job " << pid << " terminated.\n" << std::flush;
         }
         if( !is_running(pid) ){
             running_jobs.erase(pid);
-            log_file << str_time() << ": Job " << pid << " ended."  << std::flush;
+            log_file << str_time() << ": Job " << pid << " ended.\n"  << std::flush;
         }
     }
 }

@@ -50,11 +50,12 @@ bool is_running(P_ID pid){
     cmd << "ps -p " << pid << " &> " << OUTPUT_BUFFER << "\n";
     std::cout << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
-    std::this_thread::sleep_for(50ms);
+    std::this_thread::sleep_for(100ms);
     std::ifstream in_buffer(OUTPUT_BUFFER);
     std::string buffer;
     std::size_t i{0};
     while( std::getline(in_buffer, buffer) ){
+        std::cout << "buffer: " << buffer << "\n";
         i++;
     }
     return i == 2;
@@ -106,14 +107,8 @@ void start(Job& job){
     std::system(cmd.str().c_str());
     std::this_thread::sleep_for(50ms);
     std::ifstream pid_in(OUTPUT_BUFFER);
-    std::this_thread::sleep_for(2s);
+    std::this_thread::sleep_for(1s);
     if( pid_in ){
-        std::string buffer;
-        while( std::getline(pid_in, buffer) ){
-            std::cerr << "buffer: " << buffer << "\n";
-        }
-        pid_in.close();
-        pid_in.open(OUTPUT_BUFFER);
         P_ID pid;
         pid_in >> pid;
         std::cout << "PID: " << pid << "\n" << std::flush;
@@ -132,6 +127,8 @@ void start(Job& job){
 
 void clear_processes(){
     for( auto& [pid, job] : running_jobs ){
+        std::cout << "pid: " << pid << "\n";
+        std::cout << "job: " << job.command << "\n" << std::flush;
         if( pid == 0 ){
             continue;
         }

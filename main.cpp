@@ -86,8 +86,11 @@ void start(Job& job){
     auto core_ids = allocate_cores(job.n_cores);
     std::stringstream cmd;
     cmd << JOB_EXEC << " 'taskset -c ";
-    for( auto id : core_ids ){
-        cmd << id << " ";
+    for( std::size_t i = 0; i < core_ids.size(); ++i ){
+        if( i > 0 ){
+            cmd << ", ";
+        }
+        cmd << core_ids[i];
     }
     cmd << job.command << "' > " << OUTPUT_BUFFER;
     std::cerr << "cmd: " << cmd.str() << "\n";
@@ -133,10 +136,10 @@ void load_new_processes(){
     while( std::getline(job_file, job_line) ){
         std::cout << job_line << "\n";
         std::stringstream parser(job_line);
-        unsigned int max_time;
         unsigned int n_cores;
-        parser >> max_time;
         parser >> n_cores;
+        unsigned int max_time;
+        parser >> max_time;
         std::string cmd(std::istreambuf_iterator<char>(parser.rdbuf()), {});
         Job job;
         job.max_time = max_time;

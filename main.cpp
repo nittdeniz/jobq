@@ -14,6 +14,7 @@
 
 
 using P_ID = unsigned short;
+using namespace std::chrono_literals;
 
 std::vector<Job> job_queue;
 std::map<P_ID, Job> running_jobs;
@@ -105,10 +106,11 @@ void start(Job& job){
     std::system(cmd.str().c_str());
 
     std::ifstream pid_in(OUTPUT_BUFFER);
+    std::this_thread::sleep_for(2s);
     if( pid_in ){
         std::string buffer;
         while( std::getline(pid_in, buffer) ){
-            std::cout << "buffer: " << buffer << "\n";
+            std::cerr << "buffer: " << buffer << "\n";
         }
         pid_in.seekg(0);
         P_ID pid;
@@ -243,7 +245,6 @@ int main(int argc, char** argv){
 
     log_file << str_time() << ": Starting JobQ server.\n Configuration file: " << CONFIG_FILE << "\n" << std::flush;
 
-    using namespace std::chrono_literals;
     while( true ){
         clear_processes();
         load_new_processes();

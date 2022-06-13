@@ -7,6 +7,7 @@
 #include <iomanip>
 #include <iostream>
 #include <map>
+#include <regex>
 #include <sstream>
 #include <thread>
 #include <utility>
@@ -49,7 +50,7 @@ void send_sigterm(P_ID pid){
 bool is_running(P_ID pid){
     std::cerr << "is_running: " << pid << "\n";
     std::stringstream cmd;
-    cmd << "ps -p " << pid << " &> " << OUTPUT_BUFFER << "\n";
+    cmd << "ps -p " << pid << " &> " << OUTPUT_BUFFER;
     std::cerr << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
     std::this_thread::sleep_for(100ms);
@@ -58,9 +59,13 @@ bool is_running(P_ID pid){
     std::size_t i{0};
     while( std::getline(in_buffer, buffer) ){
         std::cerr << "buffer: " << buffer << "\n";
-        i++;
+        if( std::regex_match(buffer, std::regex("\\s*(1618738).*") ) ){
+            std::cerr << "match\n";
+            return true;
+        }
+        std::cerr << "no match\n";
     }
-    return i == 2;
+    return false;
 }
 
 unsigned int n_free_cores(){

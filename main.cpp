@@ -57,6 +57,7 @@ bool is_running(P_ID pid){
     std::ifstream in_buffer(OUTPUT_BUFFER);
     std::string buffer;
     std::size_t i{0};
+    std::cerr << "before getline\n";
     while( std::getline(in_buffer, buffer) ){
         std::cerr << "buffer: " << buffer << "\n";
         if( std::regex_match(buffer, std::regex("\\s*(1618738).*") ) ){
@@ -65,6 +66,7 @@ bool is_running(P_ID pid){
         }
         std::cerr << "no match\n";
     }
+    std::cerr << "after getline while\n";
     return false;
 }
 

@@ -48,14 +48,14 @@ void send_sigterm(int pid){
 bool is_running(P_ID pid){
     std::stringstream cmd;
     cmd << "ps -p " << pid << " &> " << OUTPUT_BUFFER << "\n";
-    std::cout << "cmd: " << cmd.str() << "\n";
+    std::cerr << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
     std::this_thread::sleep_for(100ms);
     std::ifstream in_buffer(OUTPUT_BUFFER);
     std::string buffer;
     std::size_t i{0};
     while( std::getline(in_buffer, buffer) ){
-        std::cout << "buffer: " << buffer << "\n";
+        std::cerr << "buffer: " << buffer << "\n";
         i++;
     }
     return i == 2;
@@ -111,7 +111,7 @@ void start(Job& job){
     if( pid_in ){
         P_ID pid;
         pid_in >> pid;
-        std::cout << "PID: " << pid << "\n" << std::flush;
+        std::cerr << "PID: " << pid << "\n" << std::flush;
         if( running_jobs.contains(pid) ){
             std::cerr << "Starting job with same id `" << pid << "`. Terminating\n";
             exit(EXIT_FAILURE);
@@ -127,8 +127,8 @@ void start(Job& job){
 
 void clear_processes(){
     for( auto& [pid, job] : running_jobs ){
-        std::cout << "pid: " << pid << "\n";
-        std::cout << "job: " << job.command << "\n" << std::flush;
+        std::cerr << "pid: " << pid << "\n";
+        std::cerr << "job: " << job.command << "\n" << std::flush;
         if( pid == 0 ){
             running_jobs.erase(0);
             continue;
@@ -146,14 +146,14 @@ void clear_processes(){
 
 void load_new_processes(){
     std::string job_line;
-    std::cout << "load_new_processes" << "\n";
+    std::cerr << "load_new_processes" << "\n";
     std::fstream job_file(QUEUE_FILE, std::ifstream::in);
     if( !job_file ){
         std::cerr << "Could not open job_file: " << QUEUE_FILE << "\n";
         exit(EXIT_FAILURE);
     }
     while( std::getline(job_file, job_line) ){
-        std::cout << job_line << "\n";
+        std::cerr << job_line << "\n";
         try
         {
             std::stringstream parser(job_line);
@@ -250,8 +250,11 @@ int main(int argc, char** argv){
     log_file << str_time() << ": Starting JobQ server.\n Configuration file: " << CONFIG_FILE << "\n" << std::flush;
 
     while( true ){
+        std::cerr << "clear\n";
         clear_processes();
+        std::cerr << "load\n";
         load_new_processes();
+        std::cerr << "start new\n";
         start_new_processes();
         std::this_thread::sleep_for(2s);
     }

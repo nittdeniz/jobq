@@ -41,13 +41,13 @@ time_t now(){
 
 void send_sigterm(int pid){
     std::stringstream cmd;
-    cmd << "killall " << pid;
+    cmd << "kill -15 " << pid;
     std::system(cmd.str().c_str());
 }
 
 bool is_running(P_ID pid){
     std::stringstream cmd;
-    cmd << "ps -p " << pid << " > " << OUTPUT_BUFFER;
+    cmd << "ps -p " << pid << " &> " << OUTPUT_BUFFER << "\n";
     std::cout << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
     std::this_thread::sleep_for(50ms);

@@ -92,7 +92,7 @@ void start(Job& job){
         }
         cmd << core_ids[i];
     }
-    cmd << job.command << "' > " << OUTPUT_BUFFER;
+    cmd << " " << job.command << "' > " << OUTPUT_BUFFER;
     std::cerr << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
 

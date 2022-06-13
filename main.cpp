@@ -81,7 +81,7 @@ std::vector<unsigned int> allocate_cores(unsigned int n){
 
 void start(Job& job){
     job.start_time = now();
-    log_file << str_time() << ": started process: `" << job.command << "`. Cores: " << job.n_cores << ". Automatic termination on: " << now() + job.max_time << "\n";
+    log_file << str_time() << ": started process: `" << job.command << "`. Cores: " << job.n_cores << ". Automatic termination on: " << now() + job.max_time << "\n" << std::flush;
 
     auto core_ids = allocate_cores(job.n_cores);
     std::stringstream cmd;
@@ -116,11 +116,11 @@ void clear_processes(){
     for( auto& [pid, job] : running_jobs ){
         if( now() - job.start_time > job.max_time ){
             send_sigterm(pid);
-            log_file << str_time() << ": Job " << pid << " terminated.";
+            log_file << str_time() << ": Job " << pid << " terminated." << std::flush;
         }
         if( !is_running(pid) ){
             running_jobs.erase(pid);
-            log_file << str_time() << ": Job " << pid << " ended.";
+            log_file << str_time() << ": Job " << pid << " ended."  << std::flush;
         }
     }
 }
@@ -135,16 +135,22 @@ void load_new_processes(){
     }
     while( std::getline(job_file, job_line) ){
         std::cout << job_line << "\n";
-        std::stringstream parser(job_line);
-        Job job;
-        parser >> job.n_cores;
-        parser >> job.max_time;
-        parser >> job.cout;
-        parser >> job.cerr;
-        std::string cmd(std::istreambuf_iterator<char>(parser.rdbuf()), {});
-        job.command = cmd.substr(1);
-        job_queue.push_back(job);
-        log_file << str_time() << ": loaded job `" << job_line << "`\n" << std::flush;
+        try
+        {
+            std::stringstream parser(job_line);
+            Job job;
+            parser >> job.n_cores;
+            parser >> job.max_time;
+            parser >> job.cout;
+            parser >> job.cerr;
+            std::string cmd(std::istreambuf_iterator<char>(parser.rdbuf()), {});
+            job.command = cmd.substr(1);
+            job_queue.push_back(job);
+            log_file << str_time() << ": loaded job `" << job_line << "`\n" << std::flush;
+        }
+        catch( std::exception& e){
+            log_file << str_time() << ": Could not load job: `" << job_line << "`\n" << std::flush;
+        }
     }
     job_file.close();
     job_file.open(QUEUE_FILE, std::ostream::out);
@@ -229,6 +235,6 @@ int main(int argc, char** argv){
         clear_processes();
         load_new_processes();
         start_new_processes();
-        std::this_thread::sleep_for(1s);
+        std::this_thread::sleep_for(2s);
     }
 }

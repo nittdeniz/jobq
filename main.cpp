@@ -50,6 +50,7 @@ bool is_running(P_ID pid){
     cmd << "ps -p " << pid << " > " << OUTPUT_BUFFER;
     std::cout << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
+    std::this_thread::sleep_for(50ms);
     std::ifstream in_buffer(OUTPUT_BUFFER);
     std::string buffer;
     std::size_t i{0};
@@ -90,7 +91,6 @@ std::vector<unsigned int> allocate_cores(unsigned int n){
 
 void start(Job& job){
     job.start_time = now();
-    log_file << str_time() << ": started process: `" << job.command << "`. Cores: " << job.n_cores << ". Automatic termination on: " << now() + job.max_time << "\n" << std::flush;
 
     auto core_ids = allocate_cores(job.n_cores);
     std::stringstream cmd;
@@ -120,6 +120,7 @@ void start(Job& job){
             exit(EXIT_FAILURE);
         }
         running_jobs[pid] = job;
+        log_file << str_time() << ": started process[" << pid << "]: `" << job.command << "`.\n\tCores: " << job.n_cores << ". \n\tAutomatic termination on: " << now() + job.max_time << "\n" << std::flush;
     }else{
         std::cerr << "Could not open buffer file. Terminating.\n";
         exit(EXIT_FAILURE);

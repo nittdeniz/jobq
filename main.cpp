@@ -123,7 +123,7 @@ void clear_processes(){
 void load_new_processes(){
     std::string job_line;
     std::cout << "load_new_processes" << "\n";
-    std::fstream job_file(QUEUE_FILE, std::ofstream::out | std::ifstream::in);
+    std::fstream job_file(QUEUE_FILE, std::ifstream::in);
     if( !job_file ){
         std::cerr << "Could not open job_file: " << QUEUE_FILE << "\n";
         exit(EXIT_FAILURE);
@@ -143,6 +143,8 @@ void load_new_processes(){
         job_queue.push_back(job);
         log_file << str_time() << ": loaded job `" << job_line << "`\n" << std::flush;
     }
+    job_file.close();
+    job_file.open(QUEUE_FILE, std::ostream::out);
 }
 
 unsigned int longest_remaining_time(){

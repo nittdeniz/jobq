@@ -44,7 +44,7 @@ void send_sigterm(int pid){
     std::system(cmd.str().c_str());
 }
 
-bool is_running(int pid){
+bool is_running(unsigned int pid){
     std::stringstream cmd;
     cmd << "ps -p " << pid << " > /dev/null";
     return std::system(cmd.str().c_str());

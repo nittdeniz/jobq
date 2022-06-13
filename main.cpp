@@ -101,7 +101,7 @@ void start(Job& job){
         }
         cmd << core_ids[i];
     }
-    cmd << " " << job.command << " 2> " << job.cerr << " 1> " << job.cout << "&' &> " << OUTPUT_BUFFER << " &";
+    cmd << " " << job.command << " 2> " << job.cerr << " 1> " << job.cout << "&' &> " << OUTPUT_BUFFER;
     std::cerr << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
     std::this_thread::sleep_for(50ms);

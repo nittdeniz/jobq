@@ -53,7 +53,9 @@ bool is_running(P_ID pid){
     cmd << "ps -p " << pid << " &> " << OUTPUT_BUFFER;
     std::cerr << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
-    std::this_thread::sleep_for(100ms);
+    std::cerr << "wrote to output buffer. sleeping 2000ms\n";
+    std::this_thread::sleep_for(2000ms);
+    std::cerr << "reading now\n";
     std::ifstream in_buffer(OUTPUT_BUFFER);
     std::string buffer;
     std::size_t i{0};

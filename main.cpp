@@ -46,8 +46,15 @@ void send_sigterm(int pid){
 
 bool is_running(unsigned int pid){
     std::stringstream cmd;
-    cmd << "ps -p " << pid << " > /dev/null";
-    return std::system(cmd.str().c_str());
+    cmd << "ps -p " << pid << " > " << OUTPUT_BUFFER;
+    std::system(cmd.str().c_str());
+    std::ifstream in_buffer(OUTPUT_BUFFER);
+    std::string buffer;
+    std::size_t i{0};
+    while( std::getline(in_buffer, buffer) ){
+        i++;
+    }
+    return i == 2;
 }
 
 unsigned int n_free_cores(){

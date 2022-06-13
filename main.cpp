@@ -8,6 +8,7 @@
 #include <iostream>
 #include <map>
 #include <sstream>
+#include <thread>
 #include <utility>
 #include <vector>
 
@@ -216,11 +217,13 @@ int main(int argc, char** argv){
         return EXIT_FAILURE;
     }
 
-    log_file << str_time() << ": Starting JobQ server.\n Configuration file: " << CONFIG_FILE << "\n";
+    log_file << str_time() << ": Starting JobQ server.\n Configuration file: " << CONFIG_FILE << "\n" << std::flush;
 
+    using namespace std::chrono_literals;
     while( true ){
         clear_processes();
         load_new_processes();
         start_new_processes();
+        std::this_thread::sleep_for(1s);
     }
 }

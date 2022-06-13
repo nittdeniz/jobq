@@ -104,7 +104,7 @@ void start(Job& job){
     cmd << " " << job.command << " 2> " << job.cerr << " 1> " << job.cout << "&' &> " << OUTPUT_BUFFER << " &";
     std::cerr << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
-
+    std::this_thread::sleep_for(50ms);
     std::ifstream pid_in(OUTPUT_BUFFER);
     std::this_thread::sleep_for(2s);
     if( pid_in ){

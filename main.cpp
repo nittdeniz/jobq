@@ -94,14 +94,14 @@ void start(Job& job){
 
     auto core_ids = allocate_cores(job.n_cores);
     std::stringstream cmd;
-    cmd << JOB_EXEC << " 'taskset -c ";
+    cmd << JOB_EXEC << " " << job.cout << " " << job.cerr << " " << OUTPUT_BUFFER << " 'taskset -c ";
     for( std::size_t i = 0; i < core_ids.size(); ++i ){
         if( i > 0 ){
             cmd << ", ";
         }
         cmd << core_ids[i];
     }
-    cmd << " " << job.command << " 2> " << job.cerr << " 1> " << job.cout << " &' &> " << OUTPUT_BUFFER;
+    cmd << " " << job.command;
     std::cerr << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
     std::this_thread::sleep_for(50ms);

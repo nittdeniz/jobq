@@ -186,7 +186,7 @@ void start_new_processes(){
 
 
 int main(int argc, char** argv){
-    std::string const CONFIG_FILE = argc > 0 ? argv[1] : "/etc/jobq/config.txt";
+    std::string const CONFIG_FILE = argc > 1 ? std::string(argv[1]) : "/etc/jobq/config.txt";
 
     std::ifstream config_in(CONFIG_FILE);
     if( !config_in ){

@@ -112,9 +112,11 @@ void start(Job& job){
         while( std::getline(pid_in, buffer) ){
             std::cerr << "buffer: " << buffer << "\n";
         }
-        pid_in.seekg(0);
+        pid_in.close();
+        pid_in.open(OUTPUT_BUFFER);
         P_ID pid;
         pid_in >> pid;
+        std::cout << "PID: " << pid << "\n" << std::flush;
         if( running_jobs.contains(pid) ){
             std::cerr << "Starting job with same id `" << pid << "`. Terminating\n";
             exit(EXIT_FAILURE);

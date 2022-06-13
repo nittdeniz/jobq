@@ -147,6 +147,9 @@ void clear_processes(){
             running_jobs.erase(pid);
             log_file << str_time() << ": Job " << pid << " ended.\n"  << std::flush;
         }
+        if( running_jobs.empty() ){
+            break;
+        }
     }
 }
 

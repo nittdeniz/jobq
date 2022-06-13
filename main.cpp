@@ -106,6 +106,11 @@ void start(Job& job){
 
     std::ifstream pid_in(OUTPUT_BUFFER);
     if( pid_in ){
+        std::string buffer;
+        while( std::getline(pid_in, buffer) ){
+            std::cout << "buffer: " << buffer << "\n";
+        }
+        pid_in.seekg(0);
         P_ID pid;
         pid_in >> pid;
         if( running_jobs.contains(pid) ){

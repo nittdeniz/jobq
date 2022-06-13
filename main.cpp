@@ -44,9 +44,10 @@ void send_sigterm(int pid){
     std::system(cmd.str().c_str());
 }
 
-bool is_running(unsigned int pid){
+bool is_running(P_ID pid){
     std::stringstream cmd;
     cmd << "ps -p " << pid << " > " << OUTPUT_BUFFER;
+    std::cout << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
     std::ifstream in_buffer(OUTPUT_BUFFER);
     std::string buffer;
@@ -105,7 +106,7 @@ void start(Job& job){
 
     std::ifstream pid_in(OUTPUT_BUFFER);
     if( pid_in ){
-        unsigned int pid;
+        P_ID pid;
         pid_in >> pid;
         if( running_jobs.contains(pid) ){
             std::cerr << "Starting job with same id `" << pid << "`. Terminating\n";

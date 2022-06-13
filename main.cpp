@@ -132,6 +132,9 @@ void start(Job& job){
 
 void clear_processes(){
     for( auto& [pid, job] : running_jobs ){
+        if( pid == 0 ){
+            continue;
+        }
         if( is_running(pid) && (now() - job.start_time > job.max_time) ){
             send_sigterm(pid);
             log_file << str_time() << ": Job " << pid << " terminated.\n" << std::flush;

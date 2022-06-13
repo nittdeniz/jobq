@@ -92,7 +92,7 @@ void start(Job& job){
         }
         cmd << core_ids[i];
     }
-    cmd << " " << job.command << "' > " << OUTPUT_BUFFER;
+    cmd << " " << job.command << " 2> " << job.cerr << " 1> " << job.cout << "&' &> " << OUTPUT_BUFFER << " &";
     std::cerr << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
 
@@ -136,14 +136,12 @@ void load_new_processes(){
     while( std::getline(job_file, job_line) ){
         std::cout << job_line << "\n";
         std::stringstream parser(job_line);
-        unsigned int n_cores;
-        parser >> n_cores;
-        unsigned int max_time;
-        parser >> max_time;
-        std::string cmd(std::istreambuf_iterator<char>(parser.rdbuf()), {});
         Job job;
-        job.max_time = max_time;
-        job.n_cores = n_cores;
+        parser >> job.n_cores;
+        parser >> job.max_time;
+        parser >> job.cout;
+        parser >> job.cerr;
+        std::string cmd(std::istreambuf_iterator<char>(parser.rdbuf()), {});
         job.command = cmd.substr(1);
         job_queue.push_back(job);
         log_file << str_time() << ": loaded job `" << job_line << "`\n" << std::flush;

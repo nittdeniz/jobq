@@ -11,6 +11,8 @@ struct Job
     unsigned int n_cores;
     unsigned int max_time;
     std::string command;
+    std::string cout;
+    std::string cerr;
     std::vector<unsigned short> processor_ids;
 };
 

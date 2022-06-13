@@ -50,7 +50,7 @@ void send_sigterm(P_ID pid){
 bool is_running(P_ID pid){
     std::cerr << "is_running: " << pid << "\n";
     std::stringstream cmd;
-    cmd << "ps -p " << pid << " 2>&1 " << OUTPUT_BUFFER;
+    cmd << "ps -p " << pid << " > " << OUTPUT_BUFFER << " 2>&1";
     std::cerr << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
     std::cerr << "wrote to output buffer. sleeping 2000ms\n";

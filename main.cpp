@@ -206,15 +206,15 @@ void load_new_processes(){
     }
 }
 
-unsigned int longest_remaining_time(){
-    unsigned int longest = 0;
+unsigned int latest_ending_time(){
+    unsigned int latest = 0;
     for( auto const& [key, job] : running_jobs ){
         auto temp = job.start_time + job.max_time;
-        if( temp > longest ){
-            longest = temp;
+        if( temp > latest ){
+            latest = temp;
         }
     }
-    return longest;
+    return latest;
 }
 
 void start_new_processes(){
@@ -244,7 +244,7 @@ void start_new_processes(){
                 free_cores -= job.n_cores;
                 it = job_queue.erase(it);
             }else{
-                job_pair = std::make_pair(job_queue.begin() - it, now() + longest_remaining_time());
+                job_pair = std::make_pair(job_queue.begin() - it, latest_ending_time());
                 it = std::next(it);
             }
         }

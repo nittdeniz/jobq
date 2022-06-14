@@ -179,6 +179,7 @@ void load_new_processes(){
     std::ignore = std::system(cmd.str().c_str());
 
     while( std::getline(file_buffer, job_line) ){
+        std::cerr << "job_line: " << job_line << "\n";
         try
         {
             std::stringstream parser(job_line);
@@ -194,6 +195,8 @@ void load_new_processes(){
             std::string cmd(std::istreambuf_iterator<char>(parser.rdbuf()), {});
             job.command = cmd.substr(1);
             job_queue.push_back(job);
+            std::cerr << str_time() << ": loaded job `" << job_line << "`\n" << std::flush;
+            std::cerr << "jobs: " << job_queue.size() << "\n";
             log_file << str_time() << ": loaded job `" << job_line << "`\n" << std::flush;
         }
         catch( std::exception& e){
@@ -253,7 +256,7 @@ void write_status(){
     status_out << "Status\tPID\tStart Time\tEnd Time\tCommand\n";
     for( auto const& [pid, job] : running_jobs ){
 //        std::cerr  << "[running]" << pid << "\t" << str_time(job.start_time) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
-        status_out << "[running]" << pid << "\t" << str_time(job.start_time) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
+        status_out << "[running]" << pid << "\t" << str_time(job.start_time - now()) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
     }
     if( job_pair.has_value() ){
         auto job = job_queue[job_pair.value().first];

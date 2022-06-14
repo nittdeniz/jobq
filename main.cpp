@@ -117,6 +117,7 @@ void start(Job& job){
         cmd << job.processor_ids[i];
     }
     cmd << " " << job.command << "'";
+    std::cerr << cmd.str() << "\n";
     std::ignore = std::system(cmd.str().c_str());
     std::this_thread::sleep_for(50ms);
     std::ifstream pid_in(OUTPUT_BUFFER);
@@ -258,7 +259,7 @@ void write_status(std::ostream& out){
         for( auto const& id : job.processor_ids ){
             out << id << " ";
         }
-        out << str_time(job.start_time - now()) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
+        out << "\t" << str_time(job.start_time - now()) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
     }
     if( job_pair.has_value() ){
         auto job = job_queue[job_pair.value().first];
@@ -267,14 +268,14 @@ void write_status(std::ostream& out){
         for( auto const& id : job.processor_ids ){
             out << id << " ";
         }
-        out << str_time(time - now()) << "\t" << str_time(job.start_time + job.max_time - now()) << "\t" << job.command << "\n";
+        out << "\t" <<str_time(time - now()) << "\t" << str_time(job.start_time + job.max_time - now()) << "\t" << job.command << "\n";
     }
     for( auto const& job : job_queue ){
         out << "[queued]\tn/a\t";
         for( auto const& id : job.processor_ids ){
             out << id << " ";
         }
-        out << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
+        out << "\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
     }
 }
 

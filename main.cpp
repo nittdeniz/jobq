@@ -160,9 +160,11 @@ void load_new_processes(){
     std::string job_line;
 
     while( std::filesystem::exists(QUEUE_FILE_LOCK) ){
-        std::this_thread::sleep_for(50ms);
+        std::cerr << "waiting for file lock\n";
+        std::this_thread::sleep_for(100ms);
     }
     std::ofstream lock_file(QUEUE_FILE_LOCK);
+    std::cerr << "created file lock\n";
     std::fstream job_file(QUEUE_FILE, std::ifstream::in);
     if( !job_file ){
         std::cerr << "Could not open job_file: " << QUEUE_FILE << "\n";
@@ -194,6 +196,7 @@ void load_new_processes(){
     std::stringstream cmd;
     cmd << "rm -f " << QUEUE_FILE_LOCK;
     std::ignore = std::system(cmd.str().c_str());
+    std::cerr << "removed file lock\n";
 }
 
 unsigned int longest_remaining_time(){

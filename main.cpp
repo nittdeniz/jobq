@@ -259,7 +259,7 @@ void write_status(std::ostream& out){
     if( job_pair.has_value() ){
         auto job = job_queue[job_pair.value().first];
         auto time = job_pair.value().second;
-        out << "[priority]\tn/a\t" << job.n_cores << "\t" <<str_time(time - now()) << "\t" << str_time(job.start_time + job.max_time - now()) << "\t" << job.command << "\n";
+        out << "[priority]\tn/a\t" << job.n_cores << "\t" <<str_time(time - now()) << "\t" << str_time(time + job.max_time - now()) << "\t" << job.command << "\n";
     }
     for( auto const& job : job_queue ){
         out << "[queued]\tn/a\t" << job.n_cores << "\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";

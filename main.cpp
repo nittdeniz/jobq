@@ -160,11 +160,9 @@ void load_new_processes(){
     std::string job_line;
 
     while( std::filesystem::exists(QUEUE_FILE_LOCK) ){
-        std::cerr << "waiting for file lock\n";
         std::this_thread::sleep_for(100ms);
     }
     std::ofstream lock_file(QUEUE_FILE_LOCK);
-    std::cerr << "created file lock\n";
     std::fstream job_file(QUEUE_FILE, std::ifstream::in);
 
     if( !job_file ){
@@ -179,7 +177,6 @@ void load_new_processes(){
     std::stringstream cmd;
     cmd << "rm -f " << QUEUE_FILE_LOCK;
     std::ignore = std::system(cmd.str().c_str());
-    std::cerr << "removed file lock\n";
 
     while( std::getline(file_buffer, job_line) ){
         try
@@ -188,6 +185,7 @@ void load_new_processes(){
             Job job;
             parser >> job.n_cores;
             if( job.n_cores == TERMINATE_SERVER ){
+                log_file << str_time() << ": Server stopped.\n";
                 exit(0);
             }
             parser >> job.max_time;

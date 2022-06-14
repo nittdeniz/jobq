@@ -17,6 +17,7 @@
 using P_ID = unsigned int;
 using namespace std::chrono_literals;
 
+unsigned int TERMINATE_SERVER = 666;
 std::vector<Job> job_queue;
 std::map<P_ID, Job> running_jobs;
 std::map<unsigned int, bool> cores_in_use;
@@ -164,6 +165,9 @@ void load_new_processes(){
             std::stringstream parser(job_line);
             Job job;
             parser >> job.n_cores;
+            if( job.n_cores == TERMINATE_SERVER ){
+                exit(0);
+            }
             parser >> job.max_time;
             parser >> job.cout;
             parser >> job.cerr;
@@ -227,6 +231,18 @@ void start_new_processes(){
 
 void write_status(){
     std::ofstream status_out(STATUS_FILE);
+    status_out << "Status\tPID\tStart Time\tEnd Time\tCommand\n";
+    for( auto const& [pid, job] : running_jobs ){
+        status_out << pid << "\t" << str_time(job.start_time) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
+    }
+    if( job_pair.has_value() ){
+        auto job = job_queue[job_pair.value().first];
+        auto time = job_pair.value().second;
+        status_out << "[priority]\tn/a\t" << str_time(time - now()) << "\t" << str_time(job.start_time + job.max_time - now()) << "\t" << job.command << "\n";
+    }
+    for( auto const& job : job_queue ){
+        status_out << "[priority]\tn/a\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
+    }
 }
 
 int main(int argc, char** argv){

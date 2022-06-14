@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <chrono>
 #include <cstdlib>
+#include <filesystem>
 #include <fstream>
 #include <iomanip>
 #include <iostream>
@@ -26,7 +27,7 @@ std::optional<std::pair<std::size_t, std::time_t>> job_pair;
 
 std::ofstream log_file;
 
-std::string LOG_FILE, QUEUE_FILE, buffer, JOB_EXEC, OUTPUT_BUFFER, STATUS_FILE;
+std::string LOG_FILE, QUEUE_FILE, buffer, JOB_EXEC, OUTPUT_BUFFER, STATUS_FILE, QUEUE_FILE_LOCK;
 unsigned int MAX_N_PROCESSORS;
 
 std::string str_time(){
@@ -157,6 +158,11 @@ void clear_processes(){
 
 void load_new_processes(){
     std::string job_line;
+
+    while( std::filesystem::exists(QUEUE_FILE_LOCK) ){
+        std::this_thread::sleep_for(50ms);
+    }
+    std::ofstream lock_file(QUEUE_FILE_LOCK);
     std::fstream job_file(QUEUE_FILE, std::ifstream::in);
     if( !job_file ){
         std::cerr << "Could not open job_file: " << QUEUE_FILE << "\n";
@@ -184,7 +190,8 @@ void load_new_processes(){
         }
     }
     job_file.close();
-    job_file.open(QUEUE_FILE, std::ostream::out);
+    job_file.open(QUEUE_FILE, std::ostream::out | std::ostream::trunc);
+    std::remove(QUEUE_FILE_LOCK.c_str());
 }
 
 unsigned int longest_remaining_time(){
@@ -262,6 +269,7 @@ int main(int argc, char** argv){
     }
     std::getline(config_in, LOG_FILE);
     std::getline(config_in, QUEUE_FILE);
+    std::getline(config_in, QUEUE_FILE_LOCK);
     std::getline(config_in, JOB_EXEC);
     std::getline(config_in, OUTPUT_BUFFER);
     std::getline(config_in, STATUS_FILE);

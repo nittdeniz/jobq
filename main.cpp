@@ -220,33 +220,32 @@ unsigned int longest_remaining_time(){
 void start_new_processes(){
     auto free_cores = n_free_cores();
     std::cerr << "free cores: " << free_cores << "\n";
-    for( std::size_t i = 0; i < job_queue.size(); ){
-        auto& job = job_queue[i];
+    for( auto it = job_queue.begin(); it != job_queue.end(); ){
+        auto& job = *it;
         if( job_pair.has_value() ){
             auto& next_job = job_queue[job_pair.value().first];
             if( next_job.n_cores <= free_cores ){
                 start(next_job);
                 free_cores -= next_job.n_cores;
-                job_queue.erase(job_queue.begin() + job_pair.value().first);
+                it = job_queue.erase(job_queue.begin() + job_pair.value().first);
                 job_pair.reset();
                 continue;
+            }else if( now() + job.max_time < job_pair.value().second && job.n_cores <= free_cores ){
+                start(job);
+                free_cores -= job.n_cores;
+                it = job_queue.erase(it);
             }else{
-                if( now() + job.max_time < job_pair.value().second && job.n_cores <= free_cores ){
-                    start(job);
-                    free_cores -= job.n_cores;
-                    job_queue.erase(job_queue.begin() + i);
-                    continue;
-                }
+                it = std::next(it);
             }
         }
         else{
             if( job.n_cores <= free_cores ){
                 start(job);
                 free_cores -= job.n_cores;
-                job_queue.erase(job_queue.begin() + i);
-                continue;
+                it = job_queue.erase(it);
             }else{
-                job_pair = std::make_pair(i, now() + longest_remaining_time());
+                job_pair = std::make_pair(job_queue.begin() - it, now() + longest_remaining_time());
+                it = std::next(it);
             }
         }
     }

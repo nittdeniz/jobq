@@ -38,7 +38,6 @@ std::string str_time(){
 
 std::string str_time(long long int delta_t){
     auto now = std::chrono::system_clock::now();
-    std::cerr << "\nstr_time: {" << delta_t << "}\n";
     auto in_time_t = std::chrono::system_clock::to_time_t(now + std::chrono::duration<long long int,std::ratio<1>>(delta_t));
     std::stringstream ss;
     ss << std::put_time(std::localtime(&in_time_t), "[%Y-%m-%d %X]");
@@ -136,7 +135,9 @@ void start(Job& job){
 
 
 void clear_processes(){
-    for( auto& [pid, job] : running_jobs ){
+    for( auto it = running_jobs.begin(); it != running_jobs.end(); ){
+        auto pid = it->first;
+        auto job = it->second;
         if( is_running(pid) && (now() - job.start_time > job.max_time) ){
             send_sigterm(pid);
             log_file << str_time() << ": Job " << pid << " terminated.\n" << std::flush;
@@ -144,11 +145,11 @@ void clear_processes(){
         std::this_thread::sleep_for(50ms);
         if( !is_running(pid) ){
             free_cores(job);
-            running_jobs.erase(pid);
+            it = running_jobs.erase(it);
             log_file << str_time() << ": Job " << pid << " ended.\n"  << std::flush;
         }
-        if( running_jobs.empty() ){
-            break;
+        else{
+            it++;
         }
     }
 }
@@ -232,20 +233,20 @@ void start_new_processes(){
 
 void write_status(){
     std::ofstream status_out(STATUS_FILE);
-    std::cerr << "Status\tPID\tStart Time\tEnd Time\tCommand\n";
+//    std::cerr << "Status\tPID\tStart Time\tEnd Time\tCommand\n";
     status_out << "Status\tPID\tStart Time\tEnd Time\tCommand\n";
     for( auto const& [pid, job] : running_jobs ){
-        std::cerr  << "[running]" << pid << "\t" << str_time(job.start_time) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
+//        std::cerr  << "[running]" << pid << "\t" << str_time(job.start_time) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
         status_out << "[running]" << pid << "\t" << str_time(job.start_time) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
     }
     if( job_pair.has_value() ){
         auto job = job_queue[job_pair.value().first];
         auto time = job_pair.value().second;
-        std::cerr << "[priority]\tn/a\t" << str_time(time - now()) << "\t" << str_time(job.start_time + job.max_time - now()) << "\t" << job.command << "\n";
+//        std::cerr << "[priority]\tn/a\t" << str_time(time - now()) << "\t" << str_time(job.start_time + job.max_time - now()) << "\t" << job.command << "\n";
         status_out << "[priority]\tn/a\t" << str_time(time - now()) << "\t" << str_time(job.start_time + job.max_time - now()) << "\t" << job.command << "\n";
     }
     for( auto const& job : job_queue ){
-        std::cerr << "[queued]\tn/a\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
+//        std::cerr << "[queued]\tn/a\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
         status_out << "[queued]\tn/a\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
     }
 }

@@ -53,13 +53,13 @@ void send_sigterm(P_ID pid){
 //    std::cerr << "kill -9 " << pid << "\n";
     std::stringstream cmd;
     cmd << "kill -9 " << pid;
-    std::system(cmd.str().c_str());
+    static_cast<void>(std::system(cmd.str().c_str()));
 }
 
 bool is_running(P_ID pid){
     std::stringstream cmd;
     cmd << "ps -p " << pid << " > " << OUTPUT_BUFFER << " 2>&1";
-    std::system(cmd.str().c_str());
+    static_cast<void>(std::system(cmd.str().c_str()));
     std::this_thread::sleep_for(50ms);
     std::ifstream in_buffer(OUTPUT_BUFFER);
     std::string buffer;
@@ -115,7 +115,7 @@ void start(Job& job){
         cmd << core_ids[i];
     }
     cmd << " " << job.command << "'";
-    std::system(cmd.str().c_str());
+    static_cast<void>(std::system(cmd.str().c_str()));
     std::this_thread::sleep_for(50ms);
     std::ifstream pid_in(OUTPUT_BUFFER);
     if( pid_in ){

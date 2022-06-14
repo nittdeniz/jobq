@@ -62,11 +62,13 @@ bool is_running(P_ID pid){
     std::cerr << "before getline\n";
     while( std::getline(in_buffer, buffer) ){
         std::cerr << "buffer: `" << buffer << "`\n";
-        if( std::regex_match(buffer, std::regex("[ \t]*1618738.*") ) ){
+        std::string reg_str = "[ \t]*" + std::to_string(pid) + ".*";
+        if( std::regex_match(buffer, std::regex(reg_str)) ){
             std::cerr << "match\n";
             return true;
         }
         std::cerr << "no match\n";
+        std::cerr << "regex: " << reg_str << "\n";
     }
     std::cerr << "after getline while\n";
     return false;

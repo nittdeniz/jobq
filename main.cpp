@@ -218,6 +218,7 @@ unsigned int longest_remaining_time(){
 
 void start_new_processes(){
     auto free_cores = n_free_cores();
+    std::cerr << "free cores: " << free_cores << "\n";
     for( std::size_t i = 0; i < job_queue.size(); ){
         auto& job = job_queue[i];
         if( job_pair.has_value() ){
@@ -250,23 +251,18 @@ void start_new_processes(){
     }
 }
 
-void write_status(){
-    std::ofstream status_out(STATUS_FILE);
-//    std::cerr << "Status\tPID\tStart Time\tEnd Time\tCommand\n";
-    status_out << "Status\tPID\tStart Time\tEnd Time\tCommand\n";
+void write_status(std::ostream& out){
+    out << "Status\tPID\tStart Time\tEnd Time\tCommand\n";
     for( auto const& [pid, job] : running_jobs ){
-//        std::cerr  << "[running]" << pid << "\t" << str_time(job.start_time) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
-        status_out << "[running]" << pid << "\t" << str_time(job.start_time - now()) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
+        out << "[running]" << pid << "\t" << str_time(job.start_time - now()) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
     }
     if( job_pair.has_value() ){
         auto job = job_queue[job_pair.value().first];
         auto time = job_pair.value().second;
-//        std::cerr << "[priority]\tn/a\t" << str_time(time - now()) << "\t" << str_time(job.start_time + job.max_time - now()) << "\t" << job.command << "\n";
-        status_out << "[priority]\tn/a\t" << str_time(time - now()) << "\t" << str_time(job.start_time + job.max_time - now()) << "\t" << job.command << "\n";
+        out << "[priority]\tn/a\t" << str_time(time - now()) << "\t" << str_time(job.start_time + job.max_time - now()) << "\t" << job.command << "\n";
     }
     for( auto const& job : job_queue ){
-//        std::cerr << "[queued]\tn/a\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
-        status_out << "[queued]\tn/a\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
+        out << "[queued]\tn/a\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
     }
 }
 
@@ -307,7 +303,9 @@ int main(int argc, char** argv){
         clear_processes();
         load_new_processes();
         start_new_processes();
-        write_status();
+        std::ofstream status_out(STATUS_FILE);
+        write_status(status_out);
+        write_status(std::cerr);
         std::this_thread::sleep_for(2s);
     }
 }

@@ -191,7 +191,9 @@ void load_new_processes(){
     }
     job_file.close();
     job_file.open(QUEUE_FILE, std::ostream::out | std::ostream::trunc);
-    std::remove(QUEUE_FILE_LOCK.c_str());
+    std::stringstream cmd;
+    cmd << "rm -f " << QUEUE_FILE_LOCK;
+    std::ignore = std::system(cmd.str().c_str());
 }
 
 unsigned int longest_remaining_time(){

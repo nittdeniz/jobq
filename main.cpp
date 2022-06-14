@@ -117,7 +117,7 @@ void start(Job& job){
         cmd << job.processor_ids[i];
     }
     cmd << " " << job.command << "'";
-    std::cerr << cmd.str() << "\n";
+//    std::cerr << cmd.str() << "\n";
     std::ignore = std::system(cmd.str().c_str());
     std::this_thread::sleep_for(50ms);
     std::ifstream pid_in(OUTPUT_BUFFER);
@@ -180,7 +180,7 @@ void load_new_processes(){
     std::ignore = std::system(cmd.str().c_str());
 
     while( std::getline(file_buffer, job_line) ){
-        std::cerr << "job_line: " << job_line << "\n";
+//        std::cerr << "job_line: " << job_line << "\n";
         try
         {
             std::stringstream parser(job_line);
@@ -196,8 +196,8 @@ void load_new_processes(){
             std::string cmd(std::istreambuf_iterator<char>(parser.rdbuf()), {});
             job.command = cmd.substr(1);
             job_queue.push_back(job);
-            std::cerr << str_time() << ": loaded job `" << job_line << "`\n" << std::flush;
-            std::cerr << "jobs: " << job_queue.size() << "\n";
+//            std::cerr << str_time() << ": loaded job `" << job_line << "`\n" << std::flush;
+//            std::cerr << "jobs: " << job_queue.size() << "\n";
             log_file << str_time() << ": loaded job `" << job_line << "`\n" << std::flush;
         }
         catch( std::exception& e){
@@ -219,7 +219,7 @@ unsigned int latest_ending_time(){
 
 void start_new_processes(){
     auto free_cores = n_free_cores();
-    std::cerr << "free cores: " << free_cores << "\n";
+//    std::cerr << "free cores: " << free_cores << "\n";
     for( auto it = job_queue.begin(); it != job_queue.end(); ){
         auto& job = *it;
         if( job_pair.has_value() ){
@@ -252,29 +252,17 @@ void start_new_processes(){
 }
 
 void write_status(std::ostream& out){
-    out << "Status\t\tPID\tCores\t\tStart Time\t\tEnd Time\t\tCommand\n";
+    out << "Status\t\tPID\tCores\tStart Time\t\tEnd Time\t\tCommand\n";
     for( auto const& [pid, job] : running_jobs ){
-        out << "[running]" << pid << "\t";
-        for( auto const& id : job.processor_ids ){
-            out << id << " ";
-        }
-        out << "\t" << str_time(job.start_time - now()) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
+        out << "[running]\t" << pid << "\t" << job.processor_ids.size() << "\t" << str_time(job.start_time - now()) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
     }
     if( job_pair.has_value() ){
         auto job = job_queue[job_pair.value().first];
         auto time = job_pair.value().second;
-        out << "[priority]\tn/a\t";
-        for( auto const& id : job.processor_ids ){
-            out << id << " ";
-        }
-        out << "\t" <<str_time(time - now()) << "\t" << str_time(job.start_time + job.max_time - now()) << "\t" << job.command << "\n";
+        out << "[priority]\tn/a\t" << job.processor_ids.size() << "\t" <<str_time(time - now()) << "\t" << str_time(job.start_time + job.max_time - now()) << "\t" << job.command << "\n";
     }
     for( auto const& job : job_queue ){
-        out << "[queued]\tn/a\t";
-        for( auto const& id : job.processor_ids ){
-            out << id << " ";
-        }
-        out << "\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
+        out << "[queued]\tn/a\t" << job.processor_ids.size() << "\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
     }
 }
 
@@ -317,7 +305,7 @@ int main(int argc, char** argv){
         start_new_processes();
         std::ofstream status_out(STATUS_FILE);
         write_status(status_out);
-        write_status(std::cerr);
+//        write_status(std::cerr);
         std::this_thread::sleep_for(2s);
     }
 }

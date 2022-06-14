@@ -304,7 +304,11 @@ int main(int argc, char** argv){
         load_new_processes();
         start_new_processes();
         std::ofstream status_out(STATUS_FILE);
-        write_status(status_out);
+        if( status_out ){
+            write_status(status_out);
+        }else{
+            log_file << str_time() << ": Can not write to status file: " << STATUS_FILE << "\n" << std::flush;
+        }
 //        write_status(std::cerr);
         std::this_thread::sleep_for(2s);
     }

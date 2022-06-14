@@ -231,7 +231,7 @@ void start_new_processes(){
                 job_pair.reset();
                 continue;
             }else{
-                if( now() + job.max_time < job_pair.value().second ){
+                if( now() + job.max_time < job_pair.value().second && job.n_cores <= free_cores ){
                     start(job);
                     free_cores -= job.n_cores;
                     job_queue.erase(job_queue.begin() + i);

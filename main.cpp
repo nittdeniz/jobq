@@ -264,6 +264,7 @@ void write_status(std::ostream& out){
     for( auto const& job : job_queue ){
         out << "[queued]\tn/a\t" << job.processor_ids.size() << "\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
     }
+    out << std::flush;
 }
 
 int main(int argc, char** argv){

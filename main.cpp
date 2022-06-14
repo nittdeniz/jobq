@@ -234,8 +234,8 @@ void write_status(){
     std::cerr << "Status\tPID\tStart Time\tEnd Time\tCommand\n";
     status_out << "Status\tPID\tStart Time\tEnd Time\tCommand\n";
     for( auto const& [pid, job] : running_jobs ){
-        std::cerr  << pid << "\t" << str_time(job.start_time) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
-        status_out << pid << "\t" << str_time(job.start_time) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
+        std::cerr  << "[running]" << pid << "\t" << str_time(job.start_time) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
+        status_out << "[running]" << pid << "\t" << str_time(job.start_time) << "\t" << str_time(job.start_time+job.max_time - now()) << "\t" << job.command << "\n";
     }
     if( job_pair.has_value() ){
         auto job = job_queue[job_pair.value().first];
@@ -244,8 +244,8 @@ void write_status(){
         status_out << "[priority]\tn/a\t" << str_time(time - now()) << "\t" << str_time(job.start_time + job.max_time - now()) << "\t" << job.command << "\n";
     }
     for( auto const& job : job_queue ){
-        std::cerr << "[priority]\tn/a\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
-        status_out << "[priority]\tn/a\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
+        std::cerr << "[queued]\tn/a\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
+        status_out << "[queued]\tn/a\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
     }
 }
 

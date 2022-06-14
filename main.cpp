@@ -109,10 +109,10 @@ void start(Job& job){
 
     job.processor_ids = allocate_cores(job.n_cores);
     std::stringstream cmd;
-    cmd << JOB_EXEC << " " << job.cout << " " << job.cerr << " " << OUTPUT_BUFFER << " 'taskset -c ";
+    cmd << JOB_EXEC << " " << job.cout << " " << job.cerr << " " << OUTPUT_BUFFER << " 'taskset -ac ";
     for( std::size_t i = 0; i < job.processor_ids.size(); ++i ){
         if( i > 0 ){
-            cmd << ", ";
+            cmd << ",";
         }
         cmd << job.processor_ids[i];
     }

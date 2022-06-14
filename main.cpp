@@ -38,6 +38,7 @@ std::string str_time(){
 
 std::string str_time(long long int delta_t){
     auto now = std::chrono::system_clock::now();
+    std::cerr << "\nstr_time: {" << delta_t << "}\n";
     auto in_time_t = std::chrono::system_clock::to_time_t(now + std::chrono::duration<long long int,std::ratio<1>>(delta_t));
     std::stringstream ss;
     ss << std::put_time(std::localtime(&in_time_t), "[%Y-%m-%d %X]");

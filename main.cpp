@@ -24,12 +24,20 @@ std::optional<std::pair<std::size_t, std::time_t>> job_pair;
 
 std::ofstream log_file;
 
-std::string LOG_FILE, QUEUE_FILE, buffer, JOB_EXEC, OUTPUT_BUFFER;
+std::string LOG_FILE, QUEUE_FILE, buffer, JOB_EXEC, OUTPUT_BUFFER, STATUS_FILE;
 unsigned int MAX_N_PROCESSORS;
 
 std::string str_time(){
     auto now = std::chrono::system_clock::now();
     auto in_time_t = std::chrono::system_clock::to_time_t(now);
+    std::stringstream ss;
+    ss << std::put_time(std::localtime(&in_time_t), "[%Y-%m-%d %X]");
+    return ss.str();
+}
+
+std::string str_time(long long int delta_t){
+    auto now = std::chrono::system_clock::now();
+    auto in_time_t = std::chrono::system_clock::to_time_t(now + std::chrono::duration<long long int,std::ratio<1>>(delta_t));
     std::stringstream ss;
     ss << std::put_time(std::localtime(&in_time_t), "[%Y-%m-%d %X]");
     return ss.str();
@@ -41,36 +49,26 @@ time_t now(){
 }
 
 void send_sigterm(P_ID pid){
-    std::cerr << "kill -15 " << pid << "\n";
+//    std::cerr << "kill -9 " << pid << "\n";
     std::stringstream cmd;
-    cmd << "kill -15 " << pid;
+    cmd << "kill -9 " << pid;
     std::system(cmd.str().c_str());
 }
 
 bool is_running(P_ID pid){
-    std::cerr << "is_running: " << pid << "\n";
     std::stringstream cmd;
     cmd << "ps -p " << pid << " > " << OUTPUT_BUFFER << " 2>&1";
-    std::cerr << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
-    std::cerr << "wrote to output buffer. sleeping 2000ms\n";
-    std::this_thread::sleep_for(2000ms);
-    std::cerr << "reading now\n";
+    std::this_thread::sleep_for(50ms);
     std::ifstream in_buffer(OUTPUT_BUFFER);
     std::string buffer;
     std::size_t i{0};
-    std::cerr << "before getline\n";
     while( std::getline(in_buffer, buffer) ){
-        std::cerr << "buffer: `" << buffer << "`\n";
         std::string reg_str = "[ \t]*" + std::to_string(pid) + ".*";
         if( std::regex_match(buffer, std::regex(reg_str)) ){
-            std::cerr << "match\n";
             return true;
         }
-        std::cerr << "no match\n";
-        std::cerr << "regex: " << reg_str << "\n";
     }
-    std::cerr << "after getline while\n";
     return false;
 }
 
@@ -81,7 +79,6 @@ unsigned int n_free_cores(){
 }
 
 void free_cores(Job const& j){
-    std::cerr << "free cores\n";
     for( auto const& i : j.processor_ids ){
         cores_in_use[i] = false;
     }
@@ -100,13 +97,11 @@ std::vector<unsigned int> allocate_cores(unsigned int n){
             break;
         }
     }
-    std::cout << "allocate cores: " << cores.size() << "\n";
     return cores;
 }
 
 
 void start(Job& job){
-    std::cerr << "Start job\n";
     job.start_time = now();
 
     auto core_ids = allocate_cores(job.n_cores);
@@ -119,21 +114,18 @@ void start(Job& job){
         cmd << core_ids[i];
     }
     cmd << " " << job.command << "'";
-    std::cerr << "cmd: " << cmd.str() << "\n";
     std::system(cmd.str().c_str());
     std::this_thread::sleep_for(50ms);
     std::ifstream pid_in(OUTPUT_BUFFER);
-    std::this_thread::sleep_for(1s);
     if( pid_in ){
         P_ID pid;
         pid_in >> pid;
-        std::cerr << "PID: " << pid << "\n" << std::flush;
         if( running_jobs.contains(pid) ){
             std::cerr << "Starting job with same id `" << pid << "`. Terminating\n";
             exit(EXIT_FAILURE);
         }
         running_jobs[pid] = job;
-        log_file << str_time() << ": started process[" << pid << "]: `" << job.command << "`.\n\tCores: " << job.n_cores << ". \n\tAutomatic termination on: " << now() + job.max_time << "\n" << std::flush;
+        log_file << str_time() << ": started process[" << pid << "]: `" << job.command << "`.\n\tCores: " << job.n_cores << ". \n\tAutomatic termination on: " << str_time(job.max_time) << "\n" << std::flush;
     }else{
         std::cerr << "Could not open buffer file. Terminating.\n";
         exit(EXIT_FAILURE);
@@ -142,18 +134,13 @@ void start(Job& job){
 
 
 void clear_processes(){
-    std::cerr << "clear processes: " << running_jobs.size() << "\n";
     for( auto& [pid, job] : running_jobs ){
-        std::cerr << "pid: " << pid << "\n";
-        std::cerr << "job: " << job.command << "\n" << std::flush;
         if( is_running(pid) && (now() - job.start_time > job.max_time) ){
-            std::cerr << "send sigterm " << pid << "\n";
             send_sigterm(pid);
             log_file << str_time() << ": Job " << pid << " terminated.\n" << std::flush;
         }
         std::this_thread::sleep_for(50ms);
         if( !is_running(pid) ){
-            std::cerr << "erasing pid " << pid << "\n";
             free_cores(job);
             running_jobs.erase(pid);
             log_file << str_time() << ": Job " << pid << " ended.\n"  << std::flush;
@@ -166,14 +153,12 @@ void clear_processes(){
 
 void load_new_processes(){
     std::string job_line;
-    std::cerr << "load_new_processes" << "\n";
     std::fstream job_file(QUEUE_FILE, std::ifstream::in);
     if( !job_file ){
         std::cerr << "Could not open job_file: " << QUEUE_FILE << "\n";
         exit(EXIT_FAILURE);
     }
     while( std::getline(job_file, job_line) ){
-        std::cerr << job_line << "\n";
         try
         {
             std::stringstream parser(job_line);
@@ -240,7 +225,9 @@ void start_new_processes(){
     }
 }
 
-
+void write_status(){
+    std::ofstream status_out(STATUS_FILE);
+}
 
 int main(int argc, char** argv){
     std::string const CONFIG_FILE = argc > 1 ? std::string(argv[1]) : "/etc/jobq/config.txt";
@@ -254,6 +241,7 @@ int main(int argc, char** argv){
     std::getline(config_in, QUEUE_FILE);
     std::getline(config_in, JOB_EXEC);
     std::getline(config_in, OUTPUT_BUFFER);
+    std::getline(config_in, STATUS_FILE);
     std::getline(config_in, buffer);
     MAX_N_PROCESSORS = std::stoi(buffer) == 0 ? 1 : std::stoi(buffer);
 
@@ -270,12 +258,10 @@ int main(int argc, char** argv){
     log_file << str_time() << ": Starting JobQ server.\n Configuration file: " << CONFIG_FILE << "\n" << std::flush;
 
     while( true ){
-        std::cerr << "clear\n";
         clear_processes();
-        std::cerr << "load\n";
         load_new_processes();
-        std::cerr << "start new\n";
         start_new_processes();
+        write_status();
         std::this_thread::sleep_for(2s);
     }
 }

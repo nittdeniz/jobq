@@ -13,7 +13,7 @@ struct Job
     std::string command;
     std::string cout;
     std::string cerr;
-    std::vector<unsigned short> processor_ids;
+    std::vector<unsigned int> processor_ids;
 };
 
 

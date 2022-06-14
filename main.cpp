@@ -107,14 +107,14 @@ std::vector<unsigned int> allocate_cores(unsigned int n){
 void start(Job& job){
     job.start_time = now();
 
-    auto core_ids = allocate_cores(job.n_cores);
+    job.processor_ids = allocate_cores(job.n_cores);
     std::stringstream cmd;
     cmd << JOB_EXEC << " " << job.cout << " " << job.cerr << " " << OUTPUT_BUFFER << " 'taskset -c ";
-    for( std::size_t i = 0; i < core_ids.size(); ++i ){
+    for( std::size_t i = 0; i < job.processor_ids.size(); ++i ){
         if( i > 0 ){
             cmd << ", ";
         }
-        cmd << core_ids[i];
+        cmd << job.processor_ids[i];
     }
     cmd << " " << job.command << "'";
     std::ignore = std::system(cmd.str().c_str());
@@ -252,7 +252,7 @@ void start_new_processes(){
 }
 
 void write_status(std::ostream& out){
-    out << "Status\tPID\tCores\tStart Time\tEnd Time\tCommand\n";
+    out << "Status\t\tPID\tCores\t\tStart Time\t\tEnd Time\t\tCommand\n";
     for( auto const& [pid, job] : running_jobs ){
         out << "[running]" << pid << "\t";
         for( auto const& id : job.processor_ids ){

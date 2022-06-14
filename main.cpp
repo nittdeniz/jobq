@@ -166,11 +166,22 @@ void load_new_processes(){
     std::ofstream lock_file(QUEUE_FILE_LOCK);
     std::cerr << "created file lock\n";
     std::fstream job_file(QUEUE_FILE, std::ifstream::in);
+
     if( !job_file ){
         std::cerr << "Could not open job_file: " << QUEUE_FILE << "\n";
         exit(EXIT_FAILURE);
     }
-    while( std::getline(job_file, job_line) ){
+
+    std::stringstream file_buffer;
+    file_buffer << job_file.rdbuf();
+    job_file.close();
+    job_file.open(QUEUE_FILE, std::ostream::out | std::ostream::trunc);
+    std::stringstream cmd;
+    cmd << "rm -f " << QUEUE_FILE_LOCK;
+    std::ignore = std::system(cmd.str().c_str());
+    std::cerr << "removed file lock\n";
+
+    while( std::getline(file_buffer, job_line) ){
         try
         {
             std::stringstream parser(job_line);
@@ -191,12 +202,6 @@ void load_new_processes(){
             log_file << str_time() << ": Could not load job: `" << job_line << "`\n" << std::flush;
         }
     }
-    job_file.close();
-    job_file.open(QUEUE_FILE, std::ostream::out | std::ostream::trunc);
-    std::stringstream cmd;
-    cmd << "rm -f " << QUEUE_FILE_LOCK;
-    std::ignore = std::system(cmd.str().c_str());
-    std::cerr << "removed file lock\n";
 }
 
 unsigned int longest_remaining_time(){
@@ -291,7 +296,11 @@ int main(int argc, char** argv){
         return EXIT_FAILURE;
     }
 
-    log_file << str_time() << ": Starting JobQ server.\n Configuration file: " << CONFIG_FILE << "\n" << std::flush;
+    log_file << str_time() << ": Starting JobQ server.\nConfiguration file: " << CONFIG_FILE << "\n" << std::flush;
+
+    std::stringstream cmd;
+    cmd << "rm -f " << QUEUE_FILE_LOCK;
+    std::ignore = std::system(cmd.str().c_str());
 
     while( true ){
         clear_processes();

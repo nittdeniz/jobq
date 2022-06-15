@@ -8,10 +8,10 @@ namespace JobQ{
     {
         switch( type ){
             case Message_Type::STATUS:
-                out << "###[" << str_time() << "]: " << msg << "\n";
+                out << "###[" << str_time() << "]: " << msg << "\n" << std::flush;
                 break;
             case Message_Type::WARNING:
-                out << "@@@[" << str_time() << "]: " << msg << "\n";
+                out << "@@@[" << str_time() << "]: " << msg << "\n" << std::flush;
                 break;
             case Message_Type::ERROR:
                 out << "!!![" << str_time() << "]: " << msg << "\n" << std::flush;

@@ -1,3 +1,4 @@
+#include "commands.hpp"
 #include "config.hpp"
 #include "file_lock.hpp"
 #include "log.hpp"
@@ -219,7 +220,7 @@ namespace JobQ{
         lock_file(COMMAND_FILE);
         std::stringstream commands(slurp(COMMAND_FILE));
         unlock_file(COMMAND_FILE);
-        if( commands.str() == "off" ){
+        if( commands.str() == CMD_SERVER_STOP ){
         	_running = false;
         }
     }

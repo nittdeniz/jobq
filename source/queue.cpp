@@ -22,7 +22,9 @@ namespace JobQ{
     , _running(true)
     {
 
+        std::cerr << "logging\n";
         JobQ::log(_log_stream, "Starting JobQ server.");
+        std::cerr << "syscall\n";
         JobQ::system_call(fmt::format("rm {} {}", QUEUE_LOCK_FILE, COMMAND_LOCK_FILE));
         for( unsigned int i = 0; i < _n_max_cores; ++i ){
             _cores_in_use[i] = false;

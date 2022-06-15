@@ -217,9 +217,9 @@ namespace JobQ{
                 exit(EXIT_FAILURE);
             }
         }
-        lock_file(COMMAND_FILE);
+        lock_file(COMMAND_LOCK_FILE);
         std::stringstream commands(slurp(COMMAND_FILE));
-        unlock_file(COMMAND_FILE);
+        unlock_file(COMMAND_LOCK_FILE);
         if( commands.str() == CMD_SERVER_STOP ){
         	_running = false;
         }

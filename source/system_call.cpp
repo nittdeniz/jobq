@@ -12,9 +12,6 @@ namespace JobQ{
     {
         using namespace std::chrono_literals;
         auto const redirected_command = cmd + std::string(" > ") + SYSTEM_BUFFER;
-        while( is_locked(SYSTEM_BUFFER) ){
-            std::this_thread::sleep_for(50ms);
-        }
         std::ignore = std::system(redirected_command.c_str());
         std::this_thread::sleep_for(50ms);
         return slurp(SYSTEM_BUFFER);

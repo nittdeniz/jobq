@@ -7,7 +7,7 @@
 
 int main(){
 	using namespace std::chrono_literals;
-	while( JobQ::lock_exists(COMMAND_LOCK_FILE) ){
+	while( JobQ::is_locked(COMMAND_LOCK_FILE) ){
 		std::this_thread::sleep_for(50ms);
 	}
 	JobQ::lock_file(COMMAND_LOCK_FILE);

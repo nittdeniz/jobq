@@ -31,7 +31,7 @@ namespace JobQ{
     	return _running;
     }
 
-    bool Queue::is_running(PID pid){
+    bool Queue::is_process_running(PID pid){
         std::string result = system_call(fmt::format("ps -p {}", pid));
         std::stringstream buffer_stream(result);
         std::string buffer;
@@ -56,12 +56,12 @@ namespace JobQ{
         for( auto it = running_jobs.begin(); it != running_jobs.end(); ){
             auto pid = it->first;
             auto job = it->second;
-            if( is_running(pid) && (now() > job.end_time ) ){
+            if( is_process_running(pid) && (now() > job.end_time ) ){
                 system_call(fmt::format("kill -15 {}", pid));
                 log(_log_stream, fmt::format("Job {} terminated.", pid));
             }
             std::this_thread::sleep_for(50ms);
-            if( !is_running(pid) ){
+            if( !is_process_running(pid) ){
                 free_cores(job);
                 it = running_jobs.erase(it);
                 log(_log_stream, fmt::format("Job {} ended.", pid));

@@ -6,8 +6,9 @@
 #include "system_call.hpp"
 #include "time.hpp"
 
+#include <fmt/core.h>
+
 #include <chrono>
-#include <format>
 #include <iostream>
 #include <regex>
 #include <thread>
@@ -19,14 +20,14 @@ namespace JobQ{
     , _queue_file(queue_file)
     {
         JobQ::log(_log_stream, "Starting JobQ server.");
-        JobQ::system_call(std::format("rm {}", QUEUE_LOCK_FILE));
+        JobQ::system_call(fmt::format("rm {}", QUEUE_LOCK_FILE));
         for( unsigned int i = 0; i < _n_max_cores; ++i ){
             _cores_in_use[i] = false;
         }
     }
 
     bool Queue::is_running(PID pid){
-        std::string result = system_call(std::format("ps -p {}", pid));
+        std::string result = system_call(fmt::format("ps -p {}", pid));
         std::stringstream buffer_stream(result);
         std::string buffer;
         while( std::getline(buffer_stream, buffer) ){
@@ -51,14 +52,14 @@ namespace JobQ{
             auto pid = it->first;
             auto job = it->second;
             if( is_running(pid) && (now() > job.end_time ) ){
-                system_call(std::format("kill -15 {}", pid));
-                log(_log_stream, std::format("Job {} terminated.", pid));
+                system_call(fmt::format("kill -15 {}", pid));
+                log(_log_stream, fmt::format("Job {} terminated.", pid));
             }
             std::this_thread::sleep_for(50ms);
             if( !is_running(pid) ){
                 free_cores(job);
                 it = running_jobs.erase(it);
-                log(_log_stream, std::format("Job {} ended.", pid));
+                log(_log_stream, fmt::format("Job {} ended.", pid));
             }
             else{
                 it++;
@@ -114,10 +115,10 @@ namespace JobQ{
                 std::string cmd(std::istreambuf_iterator<char>(parser.rdbuf()), {});
                 job.command = cmd.substr(1);
                 _queue.push_back(job);
-                log(_log_stream, std::format("Loaded job `{}`", job_line));
+                log(_log_stream, fmt::format("Loaded job `{}`", job_line));
             }
             catch( std::exception& e){
-                log(_log_stream, std::format("Could not load job: `{}`", job_line));
+                log(_log_stream, fmt::format("Could not load job: `{}`", job_line));
             }
         }
     }
@@ -191,13 +192,13 @@ namespace JobQ{
         std::string result = system_call(cmd.str());
         unsigned int pid = std::stoul(result);
         if( running_jobs.contains(pid) ){
-            log(_log_stream, std::format("Starting job with same id `{}`. Stopping server.", pid, Message_Type::ERROR));
+            log(_log_stream, fmt::format("Starting job with same id `{}`. Stopping server.", pid, Message_Type::ERROR));
             exit(EXIT_FAILURE);
         }
         running_jobs[pid] = job;
-        log(_log_stream, std::format("Started process `{}`: {}", pid));
-        log(_log_stream, std::format("Cores: `{}`: {}", job.n_cores));
-        log(_log_stream, std::format("Automatic Termination on: {}.", str_time(job.end_time)));
+        log(_log_stream, fmt::format("Started process `{}`: {}", pid));
+        log(_log_stream, fmt::format("Cores: `{}`: {}", job.n_cores));
+        log(_log_stream, fmt::format("Automatic Termination on: {}.", str_time(job.end_time)));
     }
 
     void Queue::check_status(){
@@ -206,7 +207,7 @@ namespace JobQ{
         while( is_locked(COMMAND_FILE) ){
             std::this_thread::sleep_for(50ms);
             if( ++i > 100 ){
-                log(_log_stream, "Command file lock has not been released for 100 iterations. Deadlock?", Message_Type::ERROR));
+                log(_log_stream, "Command file lock has not been released for 100 iterations. Deadlock?", Message_Type::ERROR);
                 exit(EXIT_FAILURE);
             }
         }

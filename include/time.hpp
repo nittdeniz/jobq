@@ -8,7 +8,7 @@ namespace JobQ{
     using Clock = std::chrono::system_clock;
     using Time_Point = std::chrono::time_point<Clock>;
     using Seconds = std::chrono::duration<long long int, std::ratio<1>>;
-    auto now = std::chrono::system_clock::now;
+    inline auto now = std::chrono::system_clock::now;
 
     std::string str_time();
     std::string str_time(long long int delta_t);

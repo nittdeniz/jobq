@@ -1,14 +1,13 @@
 #include "config.hpp"
-#include "log.hpp"
 #include "queue.hpp"
-#include "system_call.hpp"
 
-#include <format>
+#include <chrono>
 #include <fstream>
 #include <iostream>
-#include <map>
+#include <thread>
 
 int main(int, char**){
+    using namespace std::chrono_literals;
     std::ofstream log_stream(LOG_FILE);
 
     if( !log_stream ){
@@ -19,17 +18,7 @@ int main(int, char**){
     JobQ::Queue queue(MAX_N_PROCESSORS, log_stream, QUEUE_FILE);
 
     while( true ){
-        check_status();
-        clear_processes();
-        load_new_processes();
-        start_new_processes();
-        std::ofstream status_out(STATUS_FILE);
-        if( status_out ){
-            write_status(status_out);
-        }else{
-            log_file << str_time() << ": Can not write to status file: " << STATUS_FILE << "\n" << std::flush;
-        }
-//        write_status(std::cerr);
+        queue.process();
         std::this_thread::sleep_for(2s);
     }
 }

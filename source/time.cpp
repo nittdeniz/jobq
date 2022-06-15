@@ -14,7 +14,7 @@ namespace JobQ{
         return str_time(now() + Seconds(delta_t));
     }
 
-    std::string JobQ::str_time(const Time_Point &tp)
+    std::string str_time(const Time_Point &tp)
     {
         auto converted = std::chrono::system_clock::to_time_t(tp);
         std::stringstream ss;

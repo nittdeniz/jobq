@@ -3,14 +3,14 @@
 
 #include <string>
 
-std::string const& LOG_FILE = "/etc/jobq/log.txt";
-std::string const& QUEUE_FILE = "/etc/jobq/.queue";
-std::string const& SYSTEM_BUFFER = "/etc/jobq/.system_buffer";
-std::string const& STATUS_FILE = "/etc/jobq/.status";
-std::string const& QUEUE_LOCK_FILE = "/etc/jobq/.queue_lock";
-std::string const& COMMAND_LOCK_FILE = "/etc/jobq/.cmd_lock";
-std::string const& JOB_EXEC = "/etc/jobq/.jobexec";
-std::string const& COMMAND_FILE = "/etc/jobq/.commands";
-unsigned int const MAX_N_PROCESSORS = 20;
+extern std::string const& LOG_FILE;
+extern std::string const& QUEUE_FILE;
+extern std::string const& SYSTEM_BUFFER;
+extern std::string const& STATUS_FILE;
+extern std::string const& QUEUE_LOCK_FILE;
+extern std::string const& COMMAND_LOCK_FILE;
+extern std::string const& JOB_EXEC;
+extern std::string const& COMMAND_FILE;
+extern unsigned int const MAX_N_PROCESSORS;
 
 #endif //JOBQ_CONFIG_HPP

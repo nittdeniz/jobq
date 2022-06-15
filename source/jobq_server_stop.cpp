@@ -1,6 +1,8 @@
 #include "config.hpp"
 #include "file_lock.hpp"
 
+#include <fmt/core.h>
+
 #include <chrono>
 #include <fstream>
 #include <iostream>
@@ -15,6 +17,9 @@ int main(){
 	}
 	JobQ::lock_file(COMMAND_LOCK_FILE);
 	std::ofstream out(COMMAND_FILE);
+	if( !out ){
+	    std::cerr << fmt::format("Can not open file {}\n", COMMAND_FILE);
+	}
 	out << "off";
 	JobQ::unlock_file(COMMAND_LOCK_FILE);
 }

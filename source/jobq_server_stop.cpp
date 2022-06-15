@@ -1,3 +1,4 @@
+#include "commands.hpp"
 #include "config.hpp"
 #include "file_lock.hpp"
 
@@ -20,6 +21,6 @@ int main(){
 	if( !out ){
 	    std::cerr << fmt::format("Can not open file {}\n", COMMAND_FILE);
 	}
-	out << "off";
+	out << JobQ::CMD_SERVER_STOP;
 	JobQ::unlock_file(COMMAND_LOCK_FILE);
 }

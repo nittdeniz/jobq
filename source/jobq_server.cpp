@@ -17,7 +17,7 @@ int main(int, char**){
 
     JobQ::Queue queue(MAX_N_PROCESSORS, log_stream, QUEUE_FILE);
 
-    while( true ){
+    while( queue.running() ){
         queue.process();
         std::this_thread::sleep_for(2s);
     }

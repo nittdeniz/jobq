@@ -19,7 +19,7 @@ namespace JobQ
         std::string _queue_file;
         std::ostream& _log_stream;
         unsigned int _n_max_cores;
-
+		bool _running;
         std::optional<std::pair<std::size_t, Time_Point>> _priority_job;
 
         Time_Point _latest_ending_time() const;
@@ -27,7 +27,7 @@ namespace JobQ
         void start_process(Job& job);
         void check_status();
 
-        bool is_running(PID pid);
+        bool is_process_running(PID pid);
         void free_cores(Job const& job);
 
         std::vector<unsigned int> allocate_cores(unsigned int n);
@@ -40,6 +40,7 @@ namespace JobQ
         void start_processes();
     public:
         Queue(unsigned int n_cores, std::ostream& log_stream, std::string const& queue_file);
+        bool running() const;
         void process();
     };
 }

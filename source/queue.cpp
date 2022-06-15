@@ -18,12 +18,17 @@ namespace JobQ{
     : _n_max_cores(n_cores)
     , _log_stream(log_stream)
     , _queue_file(queue_file)
+    , _running(true)
     {
         JobQ::log(_log_stream, "Starting JobQ server.");
         JobQ::system_call(fmt::format("rm {}", QUEUE_LOCK_FILE));
         for( unsigned int i = 0; i < _n_max_cores; ++i ){
             _cores_in_use[i] = false;
         }
+    }
+
+    bool Queue::running() const{
+    	return _running;
     }
 
     bool Queue::is_running(PID pid){
@@ -204,7 +209,7 @@ namespace JobQ{
     void Queue::check_status(){
         using namespace std::chrono_literals;
         int i{0};
-        while( is_locked(COMMAND_FILE) ){
+        while( is_locked(COMMAND_LOCK_FILE) ){
             std::this_thread::sleep_for(50ms);
             if( ++i > 100 ){
                 log(_log_stream, "Command file lock has not been released for 100 iterations. Deadlock?", Message_Type::ERROR);
@@ -214,6 +219,9 @@ namespace JobQ{
         lock_file(COMMAND_FILE);
         std::stringstream commands(slurp(COMMAND_FILE));
         unlock_file(COMMAND_FILE);
+        if( commands.str() == "off" ){
+        	_running = false;
+        }
     }
 
     void Queue::process()

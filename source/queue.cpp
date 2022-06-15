@@ -21,8 +21,9 @@ namespace JobQ{
     , _queue_file(queue_file)
     , _running(true)
     {
+
         JobQ::log(_log_stream, "Starting JobQ server.");
-        JobQ::system_call(fmt::format("rm {}", QUEUE_LOCK_FILE));
+        JobQ::system_call(fmt::format("rm {} {}", QUEUE_LOCK_FILE, COMMAND_LOCK_FILE));
         for( unsigned int i = 0; i < _n_max_cores; ++i ){
             _cores_in_use[i] = false;
         }
@@ -92,8 +93,13 @@ namespace JobQ{
     void Queue::load_new_processes()
     {
         using namespace std::chrono_literals;
+        int i{0};
         while( is_locked(QUEUE_LOCK_FILE) ){
             std::this_thread::sleep_for(50ms);
+            if( ++i > 100 ){
+                log(_log_stream, "Command file lock has not been released for 100 iterations. Deadlock?", Message_Type::ERROR);
+                exit(EXIT_FAILURE);
+            }
         }
         lock_file(QUEUE_LOCK_FILE);
         std::stringstream queue_stream;
@@ -229,9 +235,13 @@ namespace JobQ{
 
     void Queue::process()
     {
+        std::cerr << "check status\n";
         check_status();
+        std::cerr << "check clear processes\n";
         clear_processes();
+        std::cerr << "check load new processes\n";
         load_new_processes();
+        std::cerr << "check start processes\n";
         start_processes();
     }
 

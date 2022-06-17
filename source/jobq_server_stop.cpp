@@ -11,16 +11,22 @@
 
 int main(){
 	using namespace std::chrono_literals;
-	std::cerr << "server stop\n";
+	int i{0};
 	while( JobQ::is_locked(COMMAND_LOCK_FILE) ){
 		std::this_thread::sleep_for(50ms);
-		std::cerr << "locked\n";
+		if( i++ > 100 ){
+		    std::cerr << "Command file is still locked. Can not stop server.\n";
+		}
 	}
 	JobQ::lock_file(COMMAND_LOCK_FILE);
 	std::ofstream out(COMMAND_FILE);
 	if( !out ){
 	    std::cerr << fmt::format("Can not open file {}\n", COMMAND_FILE);
 	}
-	out << JobQ::CMD_SERVER_STOP;
+	else{
+        std::cerr << "Server stop\n";
+        out << JobQ::CMD_SERVER_STOP;
+	}
+
 	JobQ::unlock_file(COMMAND_LOCK_FILE);
 }

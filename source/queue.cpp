@@ -10,6 +10,7 @@
 #include <fmt/core.h>
 
 #include <chrono>
+#include <filesystem>
 #include <iostream>
 #include <regex>
 #include <thread>
@@ -21,11 +22,13 @@ namespace JobQ{
     , _queue_file(queue_file)
     , _running(true)
     {
-
-        std::cerr << "logging\n";
         JobQ::log(_log_stream, "Starting JobQ server.");
-        std::cerr << "syscall\n";
-        JobQ::system_call(fmt::format("rm {} {}", QUEUE_LOCK_FILE, COMMAND_LOCK_FILE));
+        if( std::filesystem::exists(QUEUE_LOCK_FILE.c_str()) && !std::remove(QUEUE_LOCK_FILE.c_str()) ){
+            JobQ::log(_log_stream, fmt::format("Could not remove queue lock file."));
+        }
+        if( std::filesystem::exists(COMMAND_LOCK_FILE.c_str()) && !std::remove(COMMAND_LOCK_FILE.c_str()) ){
+            JobQ::log(_log_stream, fmt::format("Could not remove command lock file."));
+        }
         for( unsigned int i = 0; i < _n_max_cores; ++i ){
             _cores_in_use[i] = false;
         }

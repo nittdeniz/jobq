@@ -111,6 +111,7 @@ namespace JobQ{
         std::stringstream queue_stream;
         try{
             queue_stream << slurp(QUEUE_FILE);
+            std::ignore = std::ofstream(QUEUE_FILE);
             unlock_file(QUEUE_LOCK_FILE);
         }
         catch( std::exception& e){
@@ -231,7 +232,7 @@ namespace JobQ{
         }
         lock_file(COMMAND_LOCK_FILE);
         std::stringstream commands(slurp(COMMAND_FILE));
-        std::ofstream(COMMAND_FILE, std::ofstream::trunc);
+        std::ignore = std::ofstream(COMMAND_FILE, std::ofstream::trunc);
         unlock_file(COMMAND_LOCK_FILE);
         log(_log_stream, fmt::format("Check Status: `{}`", commands.str()));
         log(std::cerr, fmt::format("Check Status: `{}`", commands.str()));

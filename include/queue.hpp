@@ -35,6 +35,8 @@ namespace JobQ
 
         unsigned int _n_free_cores() const;
 
+        void clean_files();
+
         void clear_processes();
         void load_new_processes();
         void start_processes();

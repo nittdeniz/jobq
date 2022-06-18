@@ -24,15 +24,19 @@ namespace JobQ{
     , _running(true)
     {
         JobQ::log(_log_stream, "Starting JobQ server.");
+        std::cerr << "first if\n";
         if( std::filesystem::exists(QUEUE_LOCK_FILE.c_str()) && !std::remove(QUEUE_LOCK_FILE.c_str()) ){
             JobQ::log(_log_stream, fmt::format("Could not remove queue lock file."));
         }
+        std::cerr << "second if\n";
         if( std::filesystem::exists(COMMAND_LOCK_FILE.c_str()) && !std::remove(COMMAND_LOCK_FILE.c_str()) ){
             JobQ::log(_log_stream, fmt::format("Could not remove command lock file."));
         }
+        std::cerr << "loop\n";
         for( unsigned int i = 0; i < _n_max_cores; ++i ){
             _cores_in_use[i] = false;
         }
+        std::cerr << "end ctor\n";
     }
 
     bool Queue::running() const{

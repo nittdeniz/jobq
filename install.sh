@@ -1,6 +1,6 @@
 #!/bin/bash
 cp jobq_exec.sh /etc/jobq/jobq_exec.sh
-mkdir build
+mkdir -p build
 cd build
 git pull
 make

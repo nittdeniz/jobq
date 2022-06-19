@@ -275,7 +275,12 @@ namespace JobQ{
         if( commands.str() == CMD_SERVER_STATUS ){
             log(_log_stream, "Server status command issued.");
             auto status_out = std::ofstream(STATUS_FILE);
-            write_status(status_out);
+            if( !status_out ){
+                std::cerr << "Can not open status file.\n";
+                log(_log_stream, "Can not open status file.", Message_Type::ERROR);
+            }else{
+                write_status(status_out);
+            }
         }
     }
 

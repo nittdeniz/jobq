@@ -99,6 +99,21 @@ namespace JobQ{
         }
     }
 
+    void Queue::write_status(std::ostream& out){
+        out << "Status\t\tPID\tCores\tStart Time\t\tEnd Time\t\tCommand\n";
+        for( auto const& [pid, job] : running_jobs ){
+            out << "[running]\t" << pid << "\t" << job.processor_ids.size() << "\t" << str_time(job.start_time) << "\t" << str_time(job.end_time) << "\t" << job.command << "\n";
+        }
+        if( _priority_job.has_value() ){
+            auto job = _queue[_priority_job.value().first];
+            auto time = _priority_job.value().second;
+            out << "[priority]\tn/a\t" << job.n_cores << "\t" <<str_time(time) << "\t" << str_time(job.end_time) << "\t" << job.command << "\n";
+        }
+        for( auto const& job : _queue ){
+            out << "[queued]\tn/a\t" << job.n_cores << "\t" << "n/a" << "\t" << "n/a" << "\t" << job.command << "\n";
+        }
+    }
+
     std::vector<unsigned int> Queue::allocate_cores(unsigned int n){
         std::vector<unsigned int> cores;
         int i = 0;
@@ -255,6 +270,10 @@ namespace JobQ{
         unlock_file(COMMAND_LOCK_FILE);
         if( commands.str() == CMD_SERVER_STOP ){
         	_running = false;
+        }
+        if( commands.str() == CMD_SERVER_STATUS ){
+            auto status_out = std::ofstream(STATUS_FILE);
+            write_status(status_out);
         }
     }
 

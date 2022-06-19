@@ -26,7 +26,7 @@ namespace JobQ
 
         void start_process(Job& job);
         void check_status();
-
+        void write_status(std::ostream& out)
         bool is_process_running(PID pid);
         void free_cores(Job const& job);
 

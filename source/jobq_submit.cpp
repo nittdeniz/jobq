@@ -9,7 +9,7 @@
 
 void help(){
     std::cout << "jobq_submit usage:\n";
-    std::cout << "jobq <n_cores> <std_out> <std_err> <timelimit in seconds> <cmd>\n";
+    std::cout << "jobq_submit <n_cores> <std_out> <std_err> <timelimit in seconds> <cmd>\n";
     std::cout << "Example: jobq 2 60 'out/std.txt' 'out/err.txt' ping example.com\n";
     std::cout << "Will start the ping command on 2 cores and will automatically terminate after 60 seconds.\n";
     std::cout << "All output of the programm will be redirected to out/std.txt and out/err.txt respectively.\n";

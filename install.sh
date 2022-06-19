@@ -1,4 +1,6 @@
 #!/bin/bash
+sudo mkdir -p /etc/jobq
+sudo chown -R $USER /etc/jobq
 cp jobq_exec.sh /etc/jobq/jobq_exec.sh
 mkdir -p build
 cd build

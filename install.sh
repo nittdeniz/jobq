@@ -1,5 +1,4 @@
 #!/bin/bash
-git pull
 sudo mkdir -p /etc/jobq
 sudo setfacl -m u:$USER:rw /etc/jobq
 sudo chown -R $USER /etc/jobq

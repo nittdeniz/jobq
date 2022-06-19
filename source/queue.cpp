@@ -279,6 +279,7 @@ namespace JobQ{
                 std::cerr << "Can not open status file.\n";
                 log(_log_stream, "Can not open status file.", Message_Type::ERROR);
             }else{
+                write_status(std::cerr);
                 write_status(status_out);
             }
         }

@@ -1,3 +1,4 @@
+#include "commands.hpp"
 #include "config.hpp"
 #include "file_lock.hpp"
 #include "slurp.hpp"
@@ -19,10 +20,9 @@ int main(){
     }
     JobQ::lock_file(COMMAND_LOCK_FILE);
     auto cmd_out = std::ofstream(COMMAND_FILE);
-    cmd_out << "status\n";
+    cmd_out << JobQ::CMD_SERVER_STATUS;
     cmd_out.close();
     JobQ::unlock_file(COMMAND_LOCK_FILE);
     std::this_thread::sleep_for(3000ms);
-
     std::cout << JobQ::slurp(STATUS_FILE);
 }

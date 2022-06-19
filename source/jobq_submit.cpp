@@ -46,9 +46,14 @@ int main(int argc, char** argv){
         }
         JobQ::lock_file(QUEUE_LOCK_FILE);
         std::ofstream queue_out(QUEUE_FILE, std::ofstream::app);
-        queue_out << n_cores << " " << timelimit << " " << out << " " << err << " " << command << "\n";
+        if( !queue_out ){
+            std::cerr << "Could not open file: " << QUEUE_FILE << "\n";
+        }
+        else{
+            queue_out << n_cores << " " << timelimit << " " << out << " " << err << " " << command << "\n";
+            std::cout << "Job submitted. Type jobq_status to see status.\n";
+        }
         JobQ::unlock_file(QUEUE_LOCK_FILE);
-        std::cout << "Job submitted. Type jobq_status to see status.\n";
     }
     catch( std::exception& e ){
         std::cerr << "Could not submit job.\n" << e.what() << "\n";

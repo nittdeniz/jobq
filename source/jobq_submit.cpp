@@ -21,7 +21,7 @@ int main(int argc, char** argv){
         help();
         return EXIT_SUCCESS;
     }
-    if( argc != 6 ){
+    if( argc < 6 ){
         std::cout << "jobq_submit invalid number of arguments.\n";
         help();
         return EXIT_FAILURE;

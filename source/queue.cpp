@@ -253,8 +253,6 @@ namespace JobQ{
         std::stringstream commands(slurp(COMMAND_FILE));
         std::ignore = std::ofstream(COMMAND_FILE, std::ofstream::trunc);
         unlock_file(COMMAND_LOCK_FILE);
-        log(_log_stream, fmt::format("Check Status: `{}`", commands.str()));
-        log(std::cerr, fmt::format("Check Status: `{}`", commands.str()));
         if( commands.str() == CMD_SERVER_STOP ){
         	_running = false;
         }

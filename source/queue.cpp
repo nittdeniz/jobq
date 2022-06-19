@@ -230,12 +230,12 @@ namespace JobQ{
         std::string result = system_call(cmd.str());
         unsigned int pid = std::stoul(result);
         if( running_jobs.contains(pid) ){
-            log(_log_stream, fmt::format("Starting job with same id `{}`. Stopping server.", pid, Message_Type::ERROR));
+            log(_log_stream, fmt::format("Starting job with same id `{}`. Stopping server.", pid), Message_Type::ERROR);
             exit(EXIT_FAILURE);
         }
         running_jobs[pid] = job;
-        log(_log_stream, fmt::format("Started process `{}`: {}", pid));
-        log(_log_stream, fmt::format("Cores: `{}`: {}", job.n_cores));
+        log(_log_stream, fmt::format("Started process `{}`", pid));
+        log(_log_stream, fmt::format("Cores: `{}`", job.n_cores));
         log(_log_stream, fmt::format("Automatic Termination on: {}.", str_time(job.end_time)));
     }
 

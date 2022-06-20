@@ -84,8 +84,8 @@ namespace JobQ{
             auto pid = it->first;
             auto job = it->second;
             if( is_process_running(pid) && (now() > job.end_time ) ){
-                system_call(fmt::format("kill -15 {}", pid));
-                log(_log_stream, fmt::format("Job {} terminated.", pid));
+                system_call(fmt::format("kill -9 {}", pid));
+                log(_log_stream, fmt::format("Job {} terminated (exceeded time limit).", pid));
             }
             std::this_thread::sleep_for(50ms);
             if( !is_process_running(pid) ){
@@ -272,7 +272,7 @@ namespace JobQ{
         if( commands.str() == CMD_SERVER_STOP ){
         	_running = false;
         }
-        if( commands.str() == CMD_SERVER_STATUS ){
+        else if( commands.str() == CMD_SERVER_STATUS ){
             log(_log_stream, "Server status command issued.");
             auto status_out = std::ofstream(STATUS_FILE);
             if( !status_out ){
@@ -281,6 +281,15 @@ namespace JobQ{
             }else{
                 write_status(std::cerr);
                 write_status(status_out);
+            }
+        }else{
+            std::string cmd;
+            int pid;
+            commands >> cmd;
+            commands >> pid;
+            if( cmd == CMD_STOP ){
+                std::ignore = system_call(fmt::format("kill -15 {}", pid));
+                log(_log_stream, fmt::format("Job {} stopped ({}).", pid, CMD_STOP));
             }
         }
     }

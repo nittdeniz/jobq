@@ -6,6 +6,7 @@
 namespace JobQ{
     extern std::string const CMD_SERVER_STOP;
     extern std::string const CMD_SERVER_STATUS;
+    extern std::string const CMD_STOP;
 }
 
 #endif //JOBQ_COMMANDS_HPP

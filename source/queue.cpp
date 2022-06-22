@@ -161,6 +161,7 @@ namespace JobQ{
                 job.max_runtime = Seconds(temp);
                 parser >> job.cout;
                 parser >> job.cerr;
+                parser >> job.working_directory;
                 std::string cmd(std::istreambuf_iterator<char>(parser.rdbuf()), {});
                 job.command = cmd.substr(1);
                 _queue.push_back(job);
@@ -229,7 +230,7 @@ namespace JobQ{
         job.end_time = now() + job.max_runtime;
         job.processor_ids = allocate_cores(job.n_cores);
         std::stringstream cmd;
-        cmd << JOB_EXEC << " " << job.cout << " " << job.cerr << " " << SYSTEM_BUFFER << " 'taskset -ac ";
+        cmd << JOB_EXEC << " " << job.working_directory << " " << job.cout << " " << job.cerr << " " << SYSTEM_BUFFER << " 'taskset -ac ";
         for( std::size_t i = 0; i < job.processor_ids.size(); ++i ){
             if( i > 0 ){
                 cmd << ",";

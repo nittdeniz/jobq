@@ -9,7 +9,7 @@
 
 void help(){
     std::cout << "jobq_submit usage:\n";
-    std::cout << "jobq_submit <n_cores> <std_out> <std_err> <timelimit in seconds> <cmd>\n";
+    std::cout << "jobq_submit <n_cores> <timelimit in seconds> <std_out> <std_err> <cmd>\n";
     std::cout << "Example: jobq 2 60 'out/std.txt' 'out/err.txt' ping example.com\n";
     std::cout << "Will start the ping command on 2 cores and will automatically terminate after 60 seconds.\n";
     std::cout << "All output of the programm will be redirected to out/std.txt and out/err.txt respectively.\n";
@@ -29,6 +29,7 @@ int main(int argc, char** argv){
     try{
         unsigned int n_cores = std::atoi(argv[1]);
         unsigned int timelimit = std::atoi(argv[2]);
+        std::string working_directory = std::filesystem::current_path().string();
         std::string out(argv[3]);
         std::string err(argv[4]);
         std::string command(argv[5]);
@@ -50,7 +51,7 @@ int main(int argc, char** argv){
             std::cerr << "Could not open file: " << QUEUE_FILE << "\n";
         }
         else{
-            queue_out << n_cores << " " << timelimit << " " << out << " " << err << " " << command << "\n";
+            queue_out << n_cores << " " << timelimit << " " << out << " " << err << " " << working_directory << " " << command << "\n";
             std::cout << "Job submitted. Type jobq_status to see status.\n";
         }
         JobQ::unlock_file(QUEUE_LOCK_FILE);

@@ -18,6 +18,7 @@ namespace JobQ
         std::string command;
         std::string cout;
         std::string cerr;
+        std::string working_directory;
         std::vector<unsigned int> processor_ids;
     };
 }

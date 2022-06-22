@@ -42,15 +42,11 @@ namespace JobQ{
                 JobQ::log(_log_stream, fmt::format("Could not create file {}", QUEUE_FILE));
             }
         }
-        if( !std::filesystem::exists(STATUS_FILE) ){
-            if( !std::ofstream(STATUS_FILE) ){
-                JobQ::log(_log_stream, fmt::format("Could not create file {}", STATUS_FILE));
-            }
+        if( !std::ofstream(STATUS_FILE) ){
+            JobQ::log(_log_stream, fmt::format("Could not create file {}", STATUS_FILE));
         }
-        if( !std::filesystem::exists(COMMAND_FILE) ){
-            if( !std::ofstream(COMMAND_FILE) ){
-                JobQ::log(_log_stream, fmt::format("Could not create file {}", COMMAND_FILE));
-            }
+        if( !std::ofstream(COMMAND_FILE) ){
+            JobQ::log(_log_stream, fmt::format("Could not create file {}", COMMAND_FILE));
         }
     }
 
@@ -268,7 +264,7 @@ namespace JobQ{
         std::stringstream commands(slurp(COMMAND_FILE));
         std::ignore = std::ofstream(COMMAND_FILE, std::ofstream::trunc);
         unlock_file(COMMAND_LOCK_FILE);
-        std::cerr << "`" << commands.str() << "`";
+//        std::cerr << "`" << commands.str() << "`";
         if( commands.str() == CMD_SERVER_STOP ){
         	_running = false;
         }
@@ -279,7 +275,7 @@ namespace JobQ{
                 std::cerr << "Can not open status file.\n";
                 log(_log_stream, "Can not open status file.", Message_Type::ERROR);
             }else{
-                write_status(std::cerr);
+//                write_status(std::cerr);
                 write_status(status_out);
             }
         }else{
@@ -296,13 +292,13 @@ namespace JobQ{
 
     void Queue::process()
     {
-        std::cerr << "check status\n";
+//        std::cerr << "check status\n";
         check_status();
-        std::cerr << "check clear processes\n";
+//        std::cerr << "check clear processes\n";
         clear_processes();
-        std::cerr << "check load new processes\n";
+//        std::cerr << "check load new processes\n";
         load_new_processes();
-        std::cerr << "check start processes\n";
+//        std::cerr << "check start processes\n";
         start_processes();
     }
 

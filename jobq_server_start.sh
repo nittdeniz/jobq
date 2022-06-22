@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if ! pgrep -x jobq_server > /dev/null; then
-  /etc/jobq/jobq_server &> /dev/null 2>&1 &
+  /usr/local/sbin/jobq_server &> /dev/null 2>&1 &
   if pgrep -x jobq_server > /dev/null; then
     echo "Server started."
   else

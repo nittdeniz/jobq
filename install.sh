@@ -1,6 +1,6 @@
 #!/bin/bash
 sudo mkdir -p /etc/jobq
-sudo setfacl -m u:$USER:rw /etc/jobq
+sudo setfacl -m u:$USER:rxw /etc/jobq
 sudo chown -R $USER /etc/jobq
 cp jobq_exec.sh /etc/jobq/jobq_exec.sh
 sudo cp jobq_server_start.sh /usr/local/sbin/jobq_server_start

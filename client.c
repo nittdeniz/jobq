@@ -7,8 +7,16 @@
 #include <unistd.h>
 #define PORT 8080
 
+void print_usage(){
+    printf("jobq_ usage")
+}
+
 int main(int argc, char const* argv[])
 {
+    if( argc == 1 ){
+        print_usage();
+        exit(EXIT_SUCCESS);
+    }
     int sock = 0, valread, client_fd;
     struct sockaddr_in serv_addr;
     char* hello = "Hello from client";

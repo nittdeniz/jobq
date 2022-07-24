@@ -1,0 +1,5 @@
+#ifndef JOBQ_MESSAGES_H
+#define JOBQ_MESSAGES_H
+
+#endif //JOBQ_MESSAGES_H
+

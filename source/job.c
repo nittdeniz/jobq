@@ -3,7 +3,9 @@
 #include <malloc.h>
 
 struct Elem* push_back(struct Job_Queue* queue, struct Job j){
+    fprintf(stderr, "hidden malloc\n");
     struct Elem *elem = malloc(sizeof(struct Elem));
+    fprintf(stderr, "hidden malloc end\n");
     elem->job = j;
     elem->next = NULL;
     elem->prev = NULL;
@@ -18,24 +20,28 @@ struct Elem* push_back(struct Job_Queue* queue, struct Job j){
     return elem;
 }
 
-struct Elem* delete(struct Job_Queue* queue, struct Elem* elem){
-    if( elem == NULL ){
-        return elem;
+struct Elem* erase(struct Job_Queue* queue, struct Elem** elem){
+    if( queue == NULL || elem == NULL || *elem == NULL ){
+        return NULL;
     }
-    if( queue->first == elem ){
-        queue->first = elem->next;
+    if( (*elem)->next != NULL ){
+        (*elem)->next->prev = (*elem)->prev;
     }
-    if( queue->last == elem ){
-        queue->last = elem->prev;
+    if( (*elem)->prev != NULL ){
+        (*elem)->prev->next = (*elem)->next;
     }
-    if( elem->prev != NULL ){
-        elem->prev->next = elem->next;
+    if( queue->first == *elem ){
+        queue->first = (*elem)->next;
     }
-    if( elem->next != NULL ){
-        elem->next->prev = elem->prev;
+    if( queue->last == *elem ){
+        queue->last = (*elem)->prev;
     }
-    struct Elem* next = elem->next;
-    free(elem);
+    struct Elem* next = (*elem)->next;
+    fprintf(stderr,"free elem: %p\n", *elem);
+    free(*elem);
+    fprintf(stderr,"set elem to NULL: %p\n", *elem);
+    *elem = NULL;
+    fprintf(stderr,"set elem to NULL: %p\n", *elem);
     elem = NULL;
     return next;
 }

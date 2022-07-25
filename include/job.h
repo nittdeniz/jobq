@@ -29,7 +29,7 @@ struct Job_Queue{
 };
 
 struct Elem* push_back(struct Job_Queue* queue, struct Job j);
-struct Elem* delete(struct Job_Queue* queue, struct Elem* elem);
+struct Elem* erase(struct Job_Queue* queue, struct Elem** elem);
 
 
 #endif //JOBQ_JOB_H

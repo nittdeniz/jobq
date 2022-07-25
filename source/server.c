@@ -67,6 +67,7 @@ void* server(void* pointers){
             memcpy(&job, &buffer[1], sizeof(struct Job));
             job.id = job_id++;
             pthread_mutex_lock(m->waiting_lock);
+            fprintf(stderr, "Adding job to waiting_queue: %ld\n", job.id);
             push_back(m->waiting_queue, job);
             pthread_mutex_unlock(m->waiting_lock);
             char answer_buffer[ANSWER_BUFFER] = {0};
@@ -93,19 +94,19 @@ void* server(void* pointers){
                 running_element = running_element->next;
             }
             pthread_mutex_unlock(m->running_lock);
+            if( m->priority_elem != NULL ){
+                struct Job j = m->priority_elem->job;
+                char start_time[20] = {0};
+                char end_time[20] = {0};
+                strftime(&start_time[0], 15, "%d-%m %H:%M:%S", localtime(&j.start_time));
+                strftime(&end_time[0], 15, "%d-%m %H:%M:%S", localtime(&j.end_time));
+                n += snprintf(&answer_buffer[n], ANSWER_BUFFER - n, "%ld\t%s[priority]%s\t%s\t%ld\t%s\t%s\t%s\n", (long) j.id, CYAN, RESET, j.user_name, j.cores, &start_time[0], &end_time[0], &j.cmd[0]);
+            }
             pthread_mutex_lock(m->waiting_lock);
             struct Elem* waiting_elem = m->waiting_queue->first;
             while( waiting_elem != NULL ){
                 struct Job j = waiting_elem->job;
-                if( waiting_elem == m->priority_elem ){
-                    char start_time[20] = {0};
-                    strftime(&start_time[0], 15, "%d-%m %H:%M:%S", localtime(&j.start_time));
-                    n += snprintf(&answer_buffer[n], ANSWER_BUFFER - n, "%ld\t%s[priority]%s\t%s\t%ld\t%s\t%s\t%s\n", (long) j.id, CYAN, RESET, j.user_name,
-                                  j.cores, &start_time[0], "n/a\t", &j.cmd[0]);
-                }else{
-                    n += snprintf(&answer_buffer[n], ANSWER_BUFFER - n, "%ld\t%s[waiting]%s\t%s\t%ld\t%s\t%s\t%s\n", (long) j.id, RED, RESET, j.user_name,
-                                  j.cores, "n/a\t", "n/a\t", &j.cmd[0]);
-                }
+                n += snprintf(&answer_buffer[n], ANSWER_BUFFER - n, "%ld\t%s[waiting]%s\t%s\t%ld\t%s\t%s\t%s\n", (long) j.id, RED, RESET, j.user_name, j.cores, "n/a\t", "n/a\t", &j.cmd[0]);
                 waiting_elem = waiting_elem->next;
             }
             pthread_mutex_unlock(m->waiting_lock);

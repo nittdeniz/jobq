@@ -31,7 +31,9 @@ void prepare_submit_message(char* message_buffer, const char** argv, struct Conf
     job.id = 0;
     job.pid = 0;
     job.user_id = geteuid();
+    printf("euid: %ld\n", (long)job.user_id);
     job.group_id = getegid();
+    printf("egid: %ld\n", (long)job.group_id);
     job.start_time = 0;
     job.end_time = 0;
     memset(&job.user_name, 0, USERNAME_BUFFER);

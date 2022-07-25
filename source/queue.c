@@ -21,19 +21,46 @@ struct Elem* start_job(struct Elem* elem, struct Job_Queue* running_queue, struc
         puts("Failed to execute command.\n");
     }
     else if( elem->job.pid == 0 ){
-        chdir(elem->job.working_directory);
-        if( seteuid(elem->job.user_id) ){
-        	quit_with_error("Seteuid failure");
+        if( chdir(elem->job.working_directory) < 0 ){
+            quit_with_error("chdir failure");
         }
-        setegid(elem->job.group_id);
+        if( chdir( "/test") < 0 ){
+            quit_with_error("chdir failure");
+        }
+        char path[256] = {0};
+        char* x = &path[0];
+        x = getcwd(&path[0], 256);
+        printf("current_dir: %s", x);
+        printf("userid: %ld\n", (long)elem->job.user_id);
+        printf("groupid: %ld\n", (long)elem->job.group_id);
+        if( setegid(elem->job.group_id) < 0 ){
+            quit_with_error("setegid failure");
+        }
+        if( seteuid(elem->job.user_id) < 0){
+            quit_with_error("seteuid failure");
+        }
+        printf("usereid: %ld\n", (long)geteuid());
+        printf("groupeid: %ld\n", (long)getegid());
+        printf("userid: %ld\n", (long)getuid());
+        printf("groupid: %ld\n", (long)getgid());
         char out[24] = {0};
 	    char err[24] = {0};
         sprintf(&out[0], "out_%ld.txt", elem->job.id);
 	    sprintf(&err[0], "err_%ld.txt", elem->job.id);
 	    int fd_out = open(out, O_WRONLY | O_CREAT, S_IRWXU);
+        if( fd_out < 0 ){
+            quit_with_error("error open stdout");
+        }
 	    int fd_err = open(err, O_WRONLY | O_CREAT, S_IRWXU);
-	    dup2(fd_out, STDOUT_FILENO);
-	    dup2(fd_err, STDERR_FILENO);
+        if( fd_err < 0 ){
+            quit_with_error("error open stderr");
+        }
+	    if( dup2(fd_out, STDOUT_FILENO) < 0 ){
+            quit_with_error("dup2 failure out");
+        }
+	    if( dup2(fd_err, STDERR_FILENO) < 0 ){
+            quit_with_error("dup2 failure err");
+        }
 	    fprintf(stderr, "user_id: %ld\n",(long)elem->job.user_id);
 	    fprintf(stderr, "user_id: %ld\n",(long)geteuid());
         char command[] = "ping -c 5 -i 5 localhost";
@@ -44,7 +71,6 @@ struct Elem* start_job(struct Elem* elem, struct Job_Queue* running_queue, struc
         memcpy(&params[0], &arr[0], 3 * sizeof(char*));
         memcpy(&params[3], &split_str[0], len * sizeof(char*));
         execv("/usr/bin/taskset", params);
-        free(params);
     }
     char buffer[16] = {0};
     sprintf(&buffer[0], "pid: %ld", (long)elem->job.pid);

@@ -115,6 +115,7 @@ void clear_finished_and_overdue_jobs(struct Manager* m){
 //        printf("pid: %ld\n", (long)pid);
         if( pid == elem->job.pid ){
             printf("Job %ld finished.\n", (long)elem->job.pid);
+            m->available_cores |= elem->job.core_mask;
             elem = delete(m->running_queue, elem);
         }else{
             elem = elem->next;

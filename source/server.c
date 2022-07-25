@@ -97,11 +97,15 @@ void* server(void* pointers){
             struct Elem* waiting_elem = m->waiting_queue->first;
             while( waiting_elem != NULL ){
                 struct Job j = waiting_elem->job;
-                char start_time[20] = {0};
-                char end_time[20] = {0};
-                strftime(&start_time[0], 15, "%d-%m %H:%M:%S", localtime(&j.start_time));
-                strftime(&end_time[0], 15, "%d-%m %H:%M:%S", localtime(&j.end_time));
-                n += snprintf(&answer_buffer[n], ANSWER_BUFFER-n,"%ld\t%s[waiting]%s\t%s\t%ld\t%s\t%s\t%s\n", (long)j.id, RED, RESET, j.user_name, j.cores, "n/a\t", "n/a\t", &j.cmd[0]);
+                if( waiting_elem == m->priority_elem ){
+                    char start_time[20] = {0};
+                    strftime(&start_time[0], 15, "%d-%m %H:%M:%S", localtime(&j.start_time));
+                    n += snprintf(&answer_buffer[n], ANSWER_BUFFER - n, "%ld\t%s[priority]%s\t%s\t%ld\t%s\t%s\t%s\n", (long) j.id, CYAN, RESET, j.user_name,
+                                  j.cores, &start_time[0], "n/a\t", &j.cmd[0]);
+                }else{
+                    n += snprintf(&answer_buffer[n], ANSWER_BUFFER - n, "%ld\t%s[waiting]%s\t%s\t%ld\t%s\t%s\t%s\n", (long) j.id, RED, RESET, j.user_name,
+                                  j.cores, "n/a\t", "n/a\t", &j.cmd[0]);
+                }
                 waiting_elem = waiting_elem->next;
             }
             pthread_mutex_unlock(m->waiting_lock);

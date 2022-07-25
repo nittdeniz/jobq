@@ -72,7 +72,7 @@ struct Elem* start_job(struct Elem* elem, struct Job_Queue* running_queue, struc
         memcpy(&params[3], &split_str[0], len * sizeof(char*));
         execv("/usr/bin/taskset", params);
     }
-    char buffer[16] = {0};
+    char buffer[17] = {0};
     sprintf(&buffer[0], "pid: %ld", (long)elem->job.pid);
     puts(buffer);
     push_back(running_queue, elem->job);

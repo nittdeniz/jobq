@@ -51,7 +51,7 @@ void* server(void* pointers){
     while( true ){
         int temp_descriptor = accept(socket_descriptor, (struct sockaddr*)&socket_address, &socket_address_length);
 
-        char buffer[sizeof(struct Job)] = {0};
+        char buffer[sizeof(struct Job)+1] = {0};
         ssize_t read_bytes = read(temp_descriptor, &buffer, sizeof(struct Job));
 
         if(read_bytes < 0 ){

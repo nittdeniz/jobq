@@ -31,9 +31,7 @@ void prepare_submit_message(char* message_buffer, const char** argv, struct Conf
     job.id = 0;
     job.pid = 0;
     job.user_id = geteuid();
-    printf("euid: %ld\n", (long)job.user_id);
     job.group_id = getegid();
-    printf("egid: %ld\n", (long)job.group_id);
     job.start_time = 0;
     job.end_time = 0;
     memset(&job.user_name, 0, USERNAME_BUFFER);
@@ -64,6 +62,7 @@ void prepare_submit_message(char* message_buffer, const char** argv, struct Conf
     }
     if( job.time_limit < 1 || job.time_limit > config->maxtime ){
         printf("Timelimit must be 0 < n < %ld. Given: %ld\n", config->maxtime, job.time_limit);
+        exit(EXIT_FAILURE);
     }
     size_t cmd_length = strlen(argv[4]);
     if( cmd_length < 1 || cmd_length > MAX_CMD_LENGTH){
@@ -169,6 +168,15 @@ int main(int argc, char const* argv[]){
     if( result == -1 ){
         quit_with_error("Send failure");
     }
+
+    char answer_buffer[1024] = {0};
+    size_t answer = read(socket_descriptor, answer_buffer, 1024);
+
+    if( answer == -1 ){
+        quit_with_error("Read failure");
+    }
+
+    puts(answer_buffer);
 
     // closing the connected socket
     close(client_descriptor);

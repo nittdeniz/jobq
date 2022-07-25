@@ -26,7 +26,7 @@ struct Elem* delete(struct Job_Queue* queue, struct Elem* elem){
         queue->first = elem->next;
     }
     if( queue->last == elem ){
-        queue->last = elem->next;
+        queue->last = elem->prev;
     }
     if( elem->prev != NULL ){
         elem->prev->next = elem->next;

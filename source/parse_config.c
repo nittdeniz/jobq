@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include <sys/sysinfo.h>
 
 #define FILE_BUFFER_SIZE 256
 #define PARAMETER_SIZE 16
@@ -114,5 +115,10 @@ void parse_config(const char* file_name, struct Config *config){
             default:{
             }
         }
+    }
+    int n_procs = get_nprocs();
+    if( config->maxcores > n_procs ){
+        fprintf(stderr,"Warning: maxcores was set to %ld but system only has %d. Setting to system value.\n", config->maxcores, n_procs);
+        config->maxcores = n_procs;
     }
 }

@@ -79,6 +79,7 @@ void* server(void* pointers){
         if( buffer[0] == MSG_STATUS ){
             char answer_buffer[ANSWER_BUFFER] = {0};
             int n = 0;
+            n += snprintf(&answer_buffer[n], ANSWER_BUFFER-n, "available cores: %ld\n", get_free_cores(m));
             n += snprintf(&answer_buffer[n], ANSWER_BUFFER-n, "job id\tstatus\t\tuser\t\tcores\tstart\t\tend\t\tcommand\n");
             pthread_mutex_lock(m->running_lock);
             struct Elem* running_element = m->running_queue->first;

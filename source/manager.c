@@ -15,14 +15,18 @@ struct Elem* start_job(struct Manager* m, struct Elem* elem){
         return NULL;
     }
     elem->job.core_mask = 0;
-    long long int it = m->available_cores;
-    for( int i = 0; i < elem->job.cores; it >>= 1 ){
-        if( it & 1 ){
-            elem->job.core_mask |= 1 << i;
+    unsigned long long int it = m->available_cores;
+    for( int i = 0, j = 0; i < elem->job.cores; j++, it >>= 1 ){
+        if( (it & 1) == 1 ){
+            elem->job.core_mask |= (1ULL << j);
             i++;
         }
+        //printf("i: %d Available cores: %llX mask: %llX\n", j, it, elem->job.core_mask);
     }
+    printf("Available cores: %llX\n", m->available_cores);
+    printf("Mask: %llX\n", elem->job.core_mask);
     m->available_cores ^= elem->job.core_mask;
+    printf("Available cores: %llX\n", m->available_cores);
 
     elem->job.start_time = time(NULL);
     elem->job.end_time = elem->job.start_time + elem->job.time_limit;
@@ -71,23 +75,25 @@ struct Elem* start_job(struct Manager* m, struct Elem* elem){
         char** split_str = split(command, ' ', &len);
 //        fprintf(stderr, "len: %d\n", len);
         char* arr[] = {"taskset", "-a", NULL};
-        int memory_len = snprintf(NULL,0,"%llX", elem->job.core_mask);
+        int memory_len = snprintf(NULL,0,"0x%llX", elem->job.core_mask);
         arr[2] = malloc(memory_len + 1);
-        snprintf(arr[2], memory_len+1,"%llX", elem->job.core_mask);
+        snprintf(arr[2], memory_len+1,"0x%llX", elem->job.core_mask);
 //        fprintf(stderr,"core core_mask: %s\n", arr[2]);
         char* params[3+len];
         memcpy(&params[0], &arr[0], 3 * sizeof(char*));
         memcpy(&params[3], &split_str[0], len * sizeof(char*));
-//        char** jt = &params[0];
-//        while( *jt++ != (char*)NULL ){
-//            fprintf(stderr, "it: %p %s\n", *jt, *jt);
-//        }
+        char** jt = &params[0];
+        while( *jt++ != (char*)NULL ){
+            fprintf(stderr, "it: %p %s\n", *jt, *jt);
+        }
         execv("/usr/bin/taskset", params);
     }
     char buffer[17] = {0};
 //    sprintf(&buffer[0], "pid: %ld", (long)elem->job.pid);
     puts(buffer);
+    pthread_mutex_lock(m->running_lock);
     push_back(m->running_queue, elem->job);
+    pthread_mutex_unlock(m->running_lock);
     struct Elem* next = delete(m->waiting_queue, elem);
     return next;
 }
@@ -138,7 +144,7 @@ long get_free_cores(struct Manager* m){
     }
     long result = 0;
     unsigned long long int n = m->available_cores;
-    while( n){
+    while( n ){
         result += (long)(n&1ULL);
         n>>=1;
     }

@@ -33,6 +33,12 @@ struct Elem* start_job(struct Elem* elem, struct Job_Queue* running_queue, struc
         if( setegid(elem->job.group_id) < 0 ){
             quit_with_error("setegid failure");
         }
+        if( setgid(elem->job.group_id) < 0 ){
+            quit_with_error("setgid failure");
+        }
+        if( setuid(elem->job.user_id) < 0){
+            quit_with_error("setuid failure");
+        }
         if( seteuid(elem->job.user_id) < 0){
             quit_with_error("seteuid failure");
         }

@@ -6,6 +6,8 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include <util.h>
+#include <fcntl.h>
 
 struct Elem* start_job(struct Elem* elem, struct Job_Queue* running_queue, struct Job_Queue* waiting_queue, int* free_cores){
     if( elem == NULL || running_queue == NULL || waiting_queue == NULL || free_cores == NULL ){
@@ -20,21 +22,32 @@ struct Elem* start_job(struct Elem* elem, struct Job_Queue* running_queue, struc
     }
     else if( elem->job.pid == 0 ){
         chdir(elem->job.working_directory);
-        char* command = "ping -c 5 -i 5 localhost";
-        //char* args[7] = {"ping", "-c", "5", "-i", "5", "localhost", NULL};
-        char* tok = strtok(command, " ");
-        while( tok != NULL ){
-            tok = strtok(NULL, " ");
+        if( seteuid(elem->job.user_id) ){
+        	quit_with_error("Seteuid failure");
         }
+        setegid(elem->job.group_id);
+        char out[24] = {0};
+	    char err[24] = {0};
+        sprintf(&out[0], "out_%ld.txt", elem->job.id);
+	    sprintf(&err[0], "err_%ld.txt", elem->job.id);
+	    int fd_out = open(out, O_WRONLY | O_CREAT, S_IRWXU);
+	    int fd_err = open(err, O_WRONLY | O_CREAT, S_IRWXU);
+	    dup2(fd_out, STDOUT_FILENO);
+	    dup2(fd_err, STDERR_FILENO);
+	    fprintf(stderr, "user_id: %ld\n",(long)elem->job.user_id);
+	    fprintf(stderr, "user_id: %ld\n",(long)geteuid());
+        char command[] = "ping -c 5 -i 5 localhost";
+        int len = 0;
+        char** split_str = split(command, ' ', &len);
         char* arr[] = {"taskset", "-c", "1"};
-        char* params = malloc(3 * sizeof(char*) + 6 * sizeof(char*));
-        memcpy(params, arr, 3 * sizeof(char*));
-        memcpy(params + 3*sizeof(char*), tok, )
-        execv("/usr/bin/taskset", arr);
+        char* params[3+len];
+        memcpy(&params[0], &arr[0], 3 * sizeof(char*));
+        memcpy(&params[3], &split_str[0], len * sizeof(char*));
+        execv("/usr/bin/taskset", params);
         free(params);
     }
     char buffer[16] = {0};
-    sprintf(&buffer[0], "pid: %ld", elem->job.pid);
+    sprintf(&buffer[0], "pid: %ld", (long)elem->job.pid);
     puts(buffer);
     push_back(running_queue, elem->job);
 //    *free_cores -= elem->job.cores;

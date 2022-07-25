@@ -30,6 +30,8 @@ void prepare_submit_message(char* message_buffer, const char** argv, struct Conf
     struct Job job;
     job.id = 0;
     job.pid = 0;
+    job.user_id = geteuid();
+    job.group_id = getegid();
     job.start_time = 0;
     job.end_time = 0;
     memset(&job.user_name, 0, USERNAME_BUFFER);
@@ -45,6 +47,7 @@ void prepare_submit_message(char* message_buffer, const char** argv, struct Conf
         printf("Working directory path must not exceed %i characters.", DIRECTORY_BUFFER);
         exit(EXIT_FAILURE);
     }
+
     if( !parse_long(argv[2], &job.cores) ){
         printf("Number of cores must be valid integer: %s\n", argv[2]);
         exit(EXIT_FAILURE);

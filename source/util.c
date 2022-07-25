@@ -3,6 +3,7 @@
 #include <limits.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 #include "util.h"
 
 bool parse_long(const char* str, long* return_value){
@@ -45,4 +46,32 @@ void quit(const char* msg){
 void quit_with_error(const char* msg){
     perror(msg);
     exit(EXIT_FAILURE);
+}
+
+char** split(char* str, char tok, int *num){
+	int len = strlen(str);
+	*num = 2;
+	char* it = str;
+	for( int i = 0; i < len; ++i ){
+		if( *it == tok ){
+			*it = '\0';
+			(*num)++;
+		}
+		it++;
+	}
+	char** result = (char**)malloc(*num * sizeof(char*));
+	int j = 0;
+	int save = 1;
+	it = str;
+	for( int i = 0; i < len; ++i, ++it ){
+		if( *it == '\0' ){
+			save = 1;
+		}
+		else if( save == 1 ){
+			result[j++] = it;
+			save = 0;
+		}
+	}
+	result[j] = (char*)NULL;
+	return result;
 }

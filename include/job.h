@@ -3,14 +3,17 @@
 
 #include "config.h"
 #include <time.h>
+#include <unistd.h>
 
 struct Job{
     long id;
-    long pid;
+    pid_t pid;
     long cores;
     long time_limit;
     time_t start_time;
     time_t end_time;
+    uid_t user_id;
+    gid_t group_id;
     char user_name[USERNAME_BUFFER];
     char working_directory[DIRECTORY_BUFFER];
     char cmd[MAX_CMD_LENGTH];

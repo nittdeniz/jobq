@@ -24,9 +24,6 @@ struct Elem* start_job(struct Elem* elem, struct Job_Queue* running_queue, struc
         if( chdir(elem->job.working_directory) < 0 ){
             quit_with_error("chdir failure");
         }
-        if( chdir( "/test") < 0 ){
-            quit_with_error("chdir failure");
-        }
         char path[256] = {0};
         char* x = &path[0];
         x = getcwd(&path[0], 256);

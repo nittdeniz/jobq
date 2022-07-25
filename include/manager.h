@@ -14,7 +14,7 @@ struct Manager{
     struct Elem* priority_elem;
     time_t latest_end_time;
     long n_cores;
-    bool *available_cores;
+    unsigned long long int available_cores;
     pthread_mutex_t *running_lock;
     pthread_mutex_t *waiting_lock;
 };

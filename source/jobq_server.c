@@ -30,11 +30,6 @@ int main(int argc, char** argv){
     running_queue.first = NULL;
     running_queue.last = NULL;
 
-    bool available_cores[config.maxcores];
-    for( int i = 0; i < config.maxcores; ++i ){
-        available_cores[i] = true;
-    }
-
     pthread_mutex_t running_lock;
     pthread_mutex_t waiting_lock;
 
@@ -51,7 +46,7 @@ int main(int argc, char** argv){
     manager.priority_elem = NULL;
     manager.n_cores = config.maxcores;
     manager.latest_end_time = 0;
-    manager.available_cores = &available_cores[0];
+    manager.available_cores = 0xffffffffffffffffULL >> (64 - config.maxcores);
     manager.running_lock = &running_lock;
     manager.waiting_lock = &waiting_lock;
 

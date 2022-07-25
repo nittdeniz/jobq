@@ -11,18 +11,18 @@
 #include "util.h"
 
 struct Elem* start_job(struct Manager* m, struct Elem* elem){
-    if( m == NULL || elem == NULL || m->running_queue == NULL || m->waiting_queue == NULL || m->available_cores == NULL ){
+    if( m == NULL || elem == NULL || m->running_queue == NULL || m->waiting_queue == NULL ){
         return NULL;
     }
-    long long int core_mask = 0;
-    bool *it = m->available_cores;
-    for( int i = 0; i < elem->job.cores; it++ ){
-        if( *it ){
-            core_mask |= 1 << i;
-            *it = false;
+    elem->job.core_mask = 0;
+    long long int it = m->available_cores;
+    for( int i = 0; i < elem->job.cores; it >>= 1 ){
+        if( it & 1 ){
+            elem->job.core_mask |= 1 << i;
             i++;
         }
     }
+    m->available_cores ^= elem->job.core_mask;
 
     elem->job.start_time = time(NULL);
     elem->job.end_time = elem->job.start_time + elem->job.time_limit;
@@ -71,10 +71,10 @@ struct Elem* start_job(struct Manager* m, struct Elem* elem){
         char** split_str = split(command, ' ', &len);
 //        fprintf(stderr, "len: %d\n", len);
         char* arr[] = {"taskset", "-a", NULL};
-        int memory_len = snprintf(NULL,0,"%llX", core_mask);
+        int memory_len = snprintf(NULL,0,"%llX", elem->job.core_mask);
         arr[2] = malloc(memory_len + 1);
-        snprintf(arr[2], memory_len+1,"%llX", core_mask);
-//        fprintf(stderr,"core mask: %s\n", arr[2]);
+        snprintf(arr[2], memory_len+1,"%llX", elem->job.core_mask);
+//        fprintf(stderr,"core core_mask: %s\n", arr[2]);
         char* params[3+len];
         memcpy(&params[0], &arr[0], 3 * sizeof(char*));
         memcpy(&params[3], &split_str[0], len * sizeof(char*));
@@ -137,9 +137,10 @@ long get_free_cores(struct Manager* m){
         return 0;
     }
     long result = 0;
-    bool* it = m->available_cores;
-    for( int i = 0; i < m->n_cores; ++i, ++it ){
-        result += (long)*it;
+    unsigned long long int n = m->available_cores;
+    while( n){
+        result += (long)(n&1ULL);
+        n>>=1;
     }
     return result;
 }

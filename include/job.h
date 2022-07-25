@@ -17,6 +17,7 @@ struct Job{
     char user_name[USERNAME_BUFFER];
     char working_directory[DIRECTORY_BUFFER];
     char cmd[MAX_CMD_LENGTH];
+    unsigned long long int core_mask;
 };
 
 struct Job_Queue{

@@ -34,6 +34,7 @@ void prepare_submit_message(char* message_buffer, const char** argv, struct Conf
     job.group_id = getegid();
     job.start_time = 0;
     job.end_time = 0;
+    job.core_mask = 0;
     memset(&job.user_name, 0, USERNAME_BUFFER);
     memset(&job.working_directory, 0, DIRECTORY_BUFFER);
     memset(&job.cmd[0], 0, MAX_CMD_LENGTH);
@@ -57,11 +58,11 @@ void prepare_submit_message(char* message_buffer, const char** argv, struct Conf
         exit(EXIT_FAILURE);
     }
     if( !parse_long(argv[3], &job.time_limit) ){
-        printf("Timelimit must be valid integer: %s\n", argv[3]);
+        printf("Time limit must be valid integer: %s\n", argv[3]);
         exit(EXIT_FAILURE);
     }
     if( job.time_limit < 1 || job.time_limit > config->maxtime ){
-        printf("Timelimit must be 0 < n < %ld. Given: %ld\n", config->maxtime, job.time_limit);
+        printf("Time limit must be 0 < n < %ld. Given: %ld\n", config->maxtime, job.time_limit);
         exit(EXIT_FAILURE);
     }
     size_t cmd_length = strlen(argv[4]);

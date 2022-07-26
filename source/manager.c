@@ -14,10 +14,6 @@ struct Elem* start_job(struct Manager* m, struct Elem* elem){
     if( m == NULL || elem == NULL || m->running_queue == NULL || m->waiting_queue == NULL ){
         return NULL;
     }
-    char time_buffer[15] = {0};
-    time_t now = time(NULL);
-    strftime(&time_buffer[0], 15, "%d-%m %H:%M:%S", localtime(&now));
-    fprintf(stderr, "[%s] Start Job: %ld\n", &time_buffer[0], elem->job.id);
     elem->job.core_mask = 0;
     unsigned long long int it = m->available_cores;
     for( int i = 0, j = 0; i < elem->job.cores; j++, it >>= 1 ){
@@ -89,7 +85,10 @@ struct Elem* start_job(struct Manager* m, struct Elem* elem){
 //        }
         execv("/usr/bin/taskset", params);
     }
-    fprintf(stderr, "Starting job: %ld %ld\n", elem->job.id, (long)elem->job.pid);
+    char time_buffer[15] = {0};
+    time_t now = time(NULL);
+    strftime(&time_buffer[0], 15, "%d-%m %H:%M:%S", localtime(&now));
+    fprintf(stderr, "[%s] Starting job: %ld %ld\n", &time_buffer[0], elem->job.id, (long)elem->job.pid);
     pthread_mutex_lock(m->running_lock);
     push_back(m->running_queue, elem->job);
     pthread_mutex_unlock(m->running_lock);

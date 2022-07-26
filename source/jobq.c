@@ -66,7 +66,7 @@ void prepare_submit_message(char* message_buffer, const char** argv, struct Conf
         exit(EXIT_FAILURE);
     }
     if( job.time_limit > config->longjob && job.cores > config->longmaxcores ){
-        printf("Jobs taking longer than %ld must not acquire more than %ld cores.\n", config->longjob, config->longjob);
+        printf("Jobs taking longer than %ld must not acquire more than %ld cores.\n", config->longjob, config->longmaxcores);
         exit(EXIT_FAILURE);
     }
     size_t cmd_length = strlen(argv[4]);

@@ -80,13 +80,30 @@ void prepare_status_message(char* message_buffer){
 }
 
 void prepare_stop_message(char* message_buffer, const char** argv){
-//    message_buffer[0] = MSG_STOP;
-//    long jobq_id = 0;
-//    if( !parse_long(argv[2], &jobq_id) ){
-//        printf("jobq_id must be valid integer. Given: %s\n", argv[2]);
-//        exit(EXIT_FAILURE);
-//    }
-//    long2char(jobq_id, &message_buffer[1], JOBQ_ID_BUFFER);
+    struct Job job;
+    job.id = 0;
+    job.pid = 0;
+    job.user_id = geteuid();
+    job.group_id = getegid();
+    job.start_time = 0;
+    job.end_time = 0;
+    job.core_mask = 0;
+    job.cores = 0;
+    job.time_limit = 0;
+    memset(&job.user_name, 0, USERNAME_BUFFER);
+    memset(&job.working_directory, 0, DIRECTORY_BUFFER);
+    memset(&job.cmd[0], 0, MAX_CMD_LENGTH);
+    struct passwd *pass = getpwuid(getuid());
+    if( pass == NULL ){
+        quit_with_error("getpwuid failure");
+    }
+    memcpy(&job.user_name[0], (pass->pw_name), strlen(pass->pw_name));
+    if( !parse_long(argv[2], &job.id) ){
+        printf("jobq_id must be valid integer. Given: %s\n", argv[2]);
+        exit(EXIT_FAILURE);
+    }
+    message_buffer[0] = MSG_STOP;
+    memcpy(&message_buffer[1], &job, sizeof(struct Job));
 }
 
 enum Action{
@@ -164,14 +181,13 @@ int main(int argc, char const* argv[]){
         }
     }
 
-
     ssize_t result = send(socket_descriptor, message_buffer, sizeof(struct Job), 0);
     if( result == -1 ){
         quit_with_error("Send failure");
     }
 
-    char answer_buffer[1024] = {0};
-    size_t answer = read(socket_descriptor, answer_buffer, 1024);
+    char answer_buffer[ANSWER_BUFFER] = {0};
+    size_t answer = read(socket_descriptor, answer_buffer, ANSWER_BUFFER);
 
     if( answer == -1 ){
         quit_with_error("Read failure");

@@ -15,9 +15,7 @@ void *queue(void *pointers){
     struct Manager* m = p[2];
 
     while( true ){
-        fprintf(stderr, "clear\n");
         clear_finished_and_overdue_jobs(m);
-        fprintf(stderr, "start\n");
         start_jobs(m);
         sleep(1);
     }

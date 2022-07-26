@@ -3,9 +3,7 @@
 #include <malloc.h>
 
 struct Elem* push_back(struct Job_Queue* queue, struct Job j){
-    fprintf(stderr, "hidden malloc\n");
     struct Elem *elem = malloc(sizeof(struct Elem));
-    fprintf(stderr, "hidden malloc end\n");
     elem->job = j;
     elem->next = NULL;
     elem->prev = NULL;
@@ -37,11 +35,8 @@ struct Elem* erase(struct Job_Queue* queue, struct Elem** elem){
         queue->last = (*elem)->prev;
     }
     struct Elem* next = (*elem)->next;
-    fprintf(stderr,"free elem: %p\n", *elem);
     free(*elem);
-    fprintf(stderr,"set elem to NULL: %p\n", *elem);
     *elem = NULL;
-    fprintf(stderr,"set elem to NULL: %p\n", *elem);
     elem = NULL;
     return next;
 }

@@ -68,7 +68,10 @@ void* server(void* pointers){
             memcpy(&job, &buffer[1], sizeof(struct Job));
             job.id = job_id++;
             pthread_mutex_lock(m->waiting_lock);
-            fprintf(stderr, "Adding job to waiting_queue: %ld\n", job.id);
+            char time_buffer[15] = {0};
+            time_t now = time(NULL);
+            strftime(&time_buffer[0], 15, "%d-%m %H:%M:%S", localtime(&now));
+            fprintf(stderr, "[%s] Adding job to waiting_queue: %ld\n", &time_buffer[0], job.id);
             push_back(m->waiting_queue, job);
             pthread_mutex_unlock(m->waiting_lock);
             char answer_buffer[ANSWER_BUFFER] = {0};
@@ -76,13 +79,13 @@ void* server(void* pointers){
             send(temp_descriptor, answer_buffer, strlen(answer_buffer), 0);
         }
         if( buffer[0] == MSG_STOP ){
-            fprintf(stderr, "stop received\n");
+//            fprintf(stderr, "stop received\n");
             char answer_buffer[ANSWER_BUFFER] = {0};
             struct Job job;
             memcpy(&job, &buffer[1], sizeof(struct Job));
             int found_job = 0;
             {
-                fprintf(stderr, "lock running\n");
+//                fprintf(stderr, "lock running\n");
                 pthread_mutex_lock(m->running_lock);
                 struct Elem *r_elem = m->running_queue->first;
                 while( r_elem != NULL)
@@ -101,7 +104,10 @@ void* server(void* pointers){
                             }else
                             {
                                 usleep(1000000);
-                                fprintf(stderr, "User stopped job: %ld %ld\n", r_elem->job.id, (long) r_elem->job.pid);
+                                char time_buffer[15] = {0};
+                                time_t now = time(NULL);
+                                strftime(&time_buffer[0], 15, "%d-%m %H:%M:%S", localtime(&now));
+                                fprintf(stderr, "[%s] User stopped job: %ld %ld\n", &time_buffer[0], r_elem->job.id, (long) r_elem->job.pid);
                                 m->available_cores |= r_elem->job.core_mask;
                                 erase(m->running_queue, &r_elem);
                                 sprintf(&answer_buffer[0], GREEN "Success" RESET ": Stopped job %ld\n", job.id);
@@ -112,11 +118,11 @@ void* server(void* pointers){
                     r_elem = r_elem->next;
                 }
                 pthread_mutex_unlock(m->running_lock);
-                fprintf(stderr, "unlock running\n");
+//                fprintf(stderr, "unlock running\n");
             }
-            fprintf(stderr, "lock waiting\n");
+//            fprintf(stderr, "lock waiting\n");
             pthread_mutex_lock(m->waiting_lock);
-            fprintf(stderr, "locked waiting\n");
+//            fprintf(stderr, "locked waiting\n");
             if( !found_job )
             {
                 if( m->priority_elem != NULL)
@@ -129,7 +135,10 @@ void* server(void* pointers){
                             sprintf(&answer_buffer[0], RED "Error" RESET ": Can not stop job %ld. Insufficient permissions. (Not your job)\n", job.id);
                         }else
                         {
-                            fprintf(stderr, "User stopped job: %ld %ld\n", m->priority_elem->job.id, (long) m->priority_elem->job.pid);
+                            char time_buffer[15] = {0};
+                            time_t now = time(NULL);
+                            strftime(&time_buffer[0], 15, "%d-%m %H:%M:%S", localtime(&now));
+                            fprintf(stderr, "[%s] User stopped job: %ld %ld\n", &time_buffer[0], m->priority_elem->job.id, (long) m->priority_elem->job.pid);
                             m->priority_elem = NULL;
                             sprintf(&answer_buffer[0], GREEN "Success" RESET ": Stopped job %ld\n", job.id);
                         }
@@ -148,7 +157,10 @@ void* server(void* pointers){
                             sprintf(&answer_buffer[0], RED "Error: Can not stop job %ld. Insufficient permissions. (Not your job)\n", job.id);
                         }else
                         {
-                            fprintf(stderr, "User stopped job: %ld %ld\n", w_elem->job.id, (long) w_elem->job.pid);
+                            char time_buffer[15] = {0};
+                            time_t now = time(NULL);
+                            strftime(&time_buffer[0], 15, "%d-%m %H:%M:%S", localtime(&now));
+                            fprintf(stderr, "[%s] User stopped job: %ld %ld\n", &time_buffer[0], w_elem->job.id, (long) w_elem->job.pid);
                             erase(m->waiting_queue, &w_elem);
                             sprintf(&answer_buffer[0], GREEN "Success" RESET ": Stopped job %ld\n", job.id);
                         }
@@ -158,11 +170,11 @@ void* server(void* pointers){
                 }
             }
             pthread_mutex_unlock(m->waiting_lock);
-            fprintf(stderr, "unlocked\n");
+//            fprintf(stderr, "unlocked\n");
             if( !found_job ){
                 sprintf(&answer_buffer[0], YELLOW "Warning" RESET ": Job id %ld does not exist.\n", job.id);
             }
-            fprintf(stderr, "send\n");
+//            fprintf(stderr, "send\n");
             send(temp_descriptor, answer_buffer, strlen(answer_buffer), 0);
         }
         if( buffer[0] == MSG_STATUS ){

@@ -14,7 +14,10 @@ struct Elem* start_job(struct Manager* m, struct Elem* elem){
     if( m == NULL || elem == NULL || m->running_queue == NULL || m->waiting_queue == NULL ){
         return NULL;
     }
-    fprintf(stderr, "Start Job: %ld\n", elem->job.id);
+    char time_buffer[15] = {0};
+    time_t now = time(NULL);
+    strftime(&time_buffer[0], 15, "%d-%m %H:%M:%S", localtime(&now));
+    fprintf(stderr, "[%s] Start Job: %ld\n", &time_buffer[0], elem->job.id);
     elem->job.core_mask = 0;
     unsigned long long int it = m->available_cores;
     for( int i = 0, j = 0; i < elem->job.cores; j++, it >>= 1 ){
@@ -112,14 +115,20 @@ void clear_finished_and_overdue_jobs(struct Manager* m){
             }else{
 //                fprintf(stderr, "waiting 1s\n");
                 usleep(1000000);
-                fprintf(stderr, "Terminated job: %ld %ld\n", elem->job.id, (long) elem->job.pid);
+                char time_buffer[15] = {0};
+                time_t now = time(NULL);
+                strftime(&time_buffer[0], 15, "%d-%m %H:%M:%S", localtime(&now));
+                fprintf(stderr, "[%s] Terminated job: %ld %ld\n", &time_buffer[0], elem->job.id, (long) elem->job.pid);
             }
         }
         int status = 0;
         pid_t pid = waitpid(elem->job.pid, &status, WNOHANG);
 //        printf("pid: %ld\n", (long)pid);
         if( pid == elem->job.pid ){
-            fprintf(stderr,"Job finished: %ld %ld.\n", elem->job.id, (long)elem->job.pid);
+            char time_buffer[15] = {0};
+            time_t now = time(NULL);
+            strftime(&time_buffer[0], 15, "%d-%m %H:%M:%S", localtime(&now));
+            fprintf(stderr,"[%s] Job finished: %ld %ld.\n", &time_buffer[0], elem->job.id, (long)elem->job.pid);
 //            fprintf(stderr,"%llx %llx\n", m->available_cores, elem->job.core_mask);
             m->available_cores |= elem->job.core_mask;
 //            fprintf(stderr,"%llx %llx\n", m->available_cores, elem->job.core_mask);

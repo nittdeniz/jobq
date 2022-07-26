@@ -65,6 +65,10 @@ void prepare_submit_message(char* message_buffer, const char** argv, struct Conf
         printf("Time limit must be 0 < n < %ld. Given: %ld\n", config->maxtime, job.time_limit);
         exit(EXIT_FAILURE);
     }
+    if( job.time_limit > config->longjob && job.cores > config->longmaxcores ){
+        printf("Jobs taking longer than %ld must not acquire more than %ld cores.\n", config->longjob, config->longjob);
+        exit(EXIT_FAILURE);
+    }
     size_t cmd_length = strlen(argv[4]);
     if( cmd_length < 1 || cmd_length > MAX_CMD_LENGTH){
         printf("Command length must be between 1 < n < %d. Given: %lu", MAX_CMD_LENGTH, cmd_length);

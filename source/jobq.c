@@ -198,8 +198,6 @@ int main(int argc, char const* argv[]){
     }
 
     puts(answer_buffer);
-
-    // closing the connected socket
     close(client_descriptor);
     close(socket_descriptor);
     return 0;

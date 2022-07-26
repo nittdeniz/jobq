@@ -21,12 +21,8 @@ struct Elem* start_job(struct Manager* m, struct Elem* elem){
             elem->job.core_mask |= (1ULL << j);
             i++;
         }
-        //printf("i: %d Available cores: %llX mask: %llX\n", j, it, elem->job.core_mask);
     }
-//    fprintf(stderr,"Available cores: %llX\n", m->available_cores);
-//    fprintf(stderr,"Mask: %llX\n", elem->job.core_mask);
     m->available_cores ^= elem->job.core_mask;
-//    fprintf(stderr,"Available cores: %llX\n", m->available_cores);
 
     elem->job.start_time = time(NULL);
     elem->job.end_time = elem->job.start_time + elem->job.time_limit;
@@ -79,10 +75,6 @@ struct Elem* start_job(struct Manager* m, struct Elem* elem){
         char* params[3+len];
         memcpy(&params[0], &arr[0], 3 * sizeof(char*));
         memcpy(&params[3], &split_str[0], len * sizeof(char*));
-//        char** jt = &params[0];
-//        while( *jt++ != (char*)NULL ){
-//            fprintf(stderr, "it: %p %s\n", *jt, *jt);
-//        }
         execv("/usr/bin/taskset", params);
     }
     char time_buffer[15] = {0};
@@ -92,12 +84,7 @@ struct Elem* start_job(struct Manager* m, struct Elem* elem){
     pthread_mutex_lock(m->running_lock);
     push_back(m->running_queue, elem->job);
     pthread_mutex_unlock(m->running_lock);
-//    fprintf(stderr,"erase waiting_queue: %p\n", elem);
     struct Elem* next = erase(m->waiting_queue, &elem);
-//    fprintf(stderr,"next: %p old: %p\n", next, elem);
-//    if( elem == NULL ){
-//        fprintf(stderr, "elem is null\n");
-//    }
     return next;
 }
 
@@ -112,7 +99,6 @@ void clear_finished_and_overdue_jobs(struct Manager* m){
             if( kill(elem->job.pid, 9) < 0 ){
                 quit_with_error("Could not kill process");
             }else{
-//                fprintf(stderr, "waiting 1s\n");
                 usleep(1000000);
                 char time_buffer[15] = {0};
                 time_t now = time(NULL);
@@ -122,18 +108,13 @@ void clear_finished_and_overdue_jobs(struct Manager* m){
         }
         int status = 0;
         pid_t pid = waitpid(elem->job.pid, &status, WNOHANG);
-//        printf("pid: %ld\n", (long)pid);
         if( pid == elem->job.pid ){
             char time_buffer[15] = {0};
             time_t now = time(NULL);
             strftime(&time_buffer[0], 15, "%d-%m %H:%M:%S", localtime(&now));
             fprintf(stderr,"[%s] Job finished: %ld %ld.\n", &time_buffer[0], elem->job.id, (long)elem->job.pid);
-//            fprintf(stderr,"%llx %llx\n", m->available_cores, elem->job.core_mask);
             m->available_cores |= elem->job.core_mask;
-//            fprintf(stderr,"%llx %llx\n", m->available_cores, elem->job.core_mask);
-//            fprintf(stderr, "Deleting: %p\n", elem);
             elem = erase(m->running_queue, &elem);
-//            fprintf(stderr, "deleted: %p\n", elem);
         }else{
             elem = elem->next;
         }
@@ -172,12 +153,8 @@ long get_free_cores(struct Manager* m){
 void start_jobs(struct Manager* m){
     long n_free_cores = get_free_cores(m);
     if( m->priority_elem != NULL && m->priority_elem->job.cores <= n_free_cores ){
-//        fprintf(stderr, "STARTING PRIO\n");
         start_job(m, m->priority_elem);
         m->latest_end_time = get_latest_end_time(m);
-//        if( m->priority_elem != NULL ){
-//            fprintf(stderr, "prio != NULL\n");
-//        }
         m->priority_elem = NULL;
     }
     pthread_mutex_lock(m->waiting_lock);
@@ -186,15 +163,12 @@ void start_jobs(struct Manager* m){
     {
         if( m->priority_elem == NULL )
         {
-//            fprintf(stderr, "prio is NULL\n");
             if( waiting_elem->job.cores <= get_free_cores(m) )
             {
                 waiting_elem = start_job(m, waiting_elem);
                 m->latest_end_time = get_latest_end_time(m);
             }else
             {
-//                fprintf(stderr, "setting waiting_elem to priority %ld\n", waiting_elem->job.id);
-//                fprintf(stderr, "%p\n", m->priority_elem);
                 m->priority_elem = malloc(sizeof(struct Elem));
                 if( m->priority_elem == NULL ){
                     fprintf(stderr, "Could not allocate for priority elem\n");
@@ -206,10 +180,8 @@ void start_jobs(struct Manager* m){
                 waiting_elem = erase(m->waiting_queue, &waiting_elem);
             }
         }else{
-//            fprintf(stderr, "prio is not null\n");
             if( waiting_elem->job.time_limit + time(NULL) < m->priority_elem->job.start_time && waiting_elem->job.cores <= get_free_cores(m) )
             {
-//                fprintf(stderr, "passing priority elem\n");
                 waiting_elem = start_job(m, waiting_elem);
             }else{
                 waiting_elem = waiting_elem->next;

@@ -1,13 +1,10 @@
 #include "job.h"
 #include "manager.h"
 #include "queue.h"
-#include "util.h"
 
-#include <stdlib.h>
 #include <unistd.h>
 #include <stdbool.h>
 #include <string.h>
-#include <stdio.h>
 
 
 void *queue(void *pointers){

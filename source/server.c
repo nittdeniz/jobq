@@ -2,8 +2,6 @@
 #include "config.h"
 #include "job.h"
 #include "manager.h"
-#include "parse_config.h"
-#include "queue.h"
 #include "server.h"
 #include "time.h"
 #include "util.h"
@@ -21,7 +19,6 @@
 
 void* server(void* pointers){
     void** p = (void**) pointers;
-//    char* message_buffer = p[0];
     struct Config* config = p[1];
     struct Manager* m = p[2];
     int socket_descriptor = socket(AF_INET, SOCK_STREAM, 0);
@@ -79,13 +76,11 @@ void* server(void* pointers){
             send(temp_descriptor, answer_buffer, strlen(answer_buffer), 0);
         }
         if( buffer[0] == MSG_STOP ){
-//            fprintf(stderr, "stop received\n");
             char answer_buffer[ANSWER_BUFFER] = {0};
             struct Job job;
             memcpy(&job, &buffer[1], sizeof(struct Job));
             int found_job = 0;
             {
-//                fprintf(stderr, "lock running\n");
                 pthread_mutex_lock(m->running_lock);
                 struct Elem *r_elem = m->running_queue->first;
                 while( r_elem != NULL)
@@ -118,11 +113,8 @@ void* server(void* pointers){
                     r_elem = r_elem->next;
                 }
                 pthread_mutex_unlock(m->running_lock);
-//                fprintf(stderr, "unlock running\n");
             }
-//            fprintf(stderr, "lock waiting\n");
             pthread_mutex_lock(m->waiting_lock);
-//            fprintf(stderr, "locked waiting\n");
             if( !found_job )
             {
                 if( m->priority_elem != NULL)
@@ -170,11 +162,9 @@ void* server(void* pointers){
                 }
             }
             pthread_mutex_unlock(m->waiting_lock);
-//            fprintf(stderr, "unlocked\n");
             if( !found_job ){
                 sprintf(&answer_buffer[0], YELLOW "Warning" RESET ": Job id %ld does not exist.\n", job.id);
             }
-//            fprintf(stderr, "send\n");
             send(temp_descriptor, answer_buffer, strlen(answer_buffer), 0);
         }
         if( buffer[0] == MSG_STATUS ){
